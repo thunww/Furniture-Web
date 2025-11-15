@@ -1,36 +1,13 @@
-# --------------------------
-# 1) BUILD STAGE - VITE
-# --------------------------
-FROM node:20-alpine AS build
-
-WORKDIR /app
-
-# Copy package files trước để tối ưu cache
-COPY package*.json ./
-
-RUN npm install
-
-# Copy toàn bộ FE vào
-COPY . .
-
-# Build ra thư mục dist
-RUN npm run build
-
-
-
-# --------------------------
-# 2) RUN STAGE - NGINX
-# --------------------------
 FROM nginx:alpine
 
-# Xóa default config của Nginx
+# Xóa config default
 RUN rm -rf /etc/nginx/conf.d/default.conf
 
-# Copy config Nginx custom (em tạo file bên dưới)
+# Copy cấu hình Nginx của FE
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy FE build (dist) vào nginx
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copy dist đã build sẵn (anh upload từ local)
+COPY dist /usr/share/nginx/html
 
 EXPOSE 80
 
