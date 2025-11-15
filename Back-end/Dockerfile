@@ -3,13 +3,11 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --production
 
-# Copy toàn bộ project
+# Copy toàn bộ source
 COPY . .
 
-# Expose port
 EXPOSE 5000
 
-# Chạy file server.js trong thư mục src
 CMD ["node", "src/server.js"]
