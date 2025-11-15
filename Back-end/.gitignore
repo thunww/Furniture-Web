@@ -4,6 +4,8 @@ node_modules/
 # environment
 .env
 .env.docker
+.env.local
+docker.env
 
 # logs
 npm-debug.log*
