@@ -8,7 +8,7 @@ import axios from "axios";
 
 // 1) Khi chạy LOCAL (npm run dev)
 // → import.meta.env.VITE_API_URL có giá trị → dùng local backend
-let API_URL = import.meta.env.VITE_API_URL;
+let API_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
 // 2) Khi chạy DOCKER → không có VITE_API_URL
 // → FE phải gọi BE qua service name "backend"
