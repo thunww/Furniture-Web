@@ -1,20 +1,7 @@
 import axios from "axios";
 
-/**
- * ================================
- * BASE URL logic cho Local + Docker
- * ================================
- */
-
-// 1) Khi chạy LOCAL (npm run dev)
-// → import.meta.env.VITE_API_URL có giá trị → dùng local backend
-let API_URL = import.meta.env.VITE_API_URL || "/api/v1";
-
-// 2) Khi chạy DOCKER → không có VITE_API_URL
-// → FE phải gọi BE qua service name "backend"
-if (!API_URL) {
-  API_URL = "http://backend:5000/api/v1";
-}
+// 🔗 API_URL đến từ file .env hoặc .env.local
+const API_URL = import.meta.env.VITE_API_URL;
 
 console.log("🔗 FE đang dùng API:", API_URL);
 
@@ -23,19 +10,17 @@ const axiosClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Tự động gửi cookie
+  withCredentials: true, // FE gửi cookie refreshToken
   timeout: 10000,
 });
 
 // ========= REQUEST =========
 axiosClient.interceptors.request.use(
-  (config) => {
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error)
 );
 
-// ========= RESPONSE (Refresh Token Logic) =========
+// ========= RESPONSE + REFRESH TOKEN LOGIC =========
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -53,16 +38,16 @@ axiosClient.interceptors.response.use(
 
     if (!error.response) return Promise.reject(error);
 
-    if (originalRequest.url === "/auth/refresh-token") {
+    // tránh loop khi refresh lỗi
+    if (originalRequest.url.includes("/auth/refresh-token")) {
       return Promise.reject(error);
     }
 
+    // Kiểm tra refreshToken trong cookie
     const hasRefresh = document.cookie.includes("refreshToken=");
+    if (!hasRefresh) return Promise.reject(error);
 
-    if (!hasRefresh) {
-      return Promise.reject(error);
-    }
-
+    // Token hết hạn
     if (error.response.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -78,6 +63,7 @@ axiosClient.interceptors.response.use(
       try {
         await axiosClient.post("/auth/refresh-token");
         processQueue(null, true);
+
         return axiosClient(originalRequest);
       } catch (err) {
         processQueue(err, null);
