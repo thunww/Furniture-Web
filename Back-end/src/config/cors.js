@@ -7,6 +7,7 @@ const configCORS = (app) => {
     "http://localhost:3000", // local dev FE
     "https://noithatstore.site", // FE domain
     "https://api.noithatstore.site", // BE domain (optional)
+    "https://furniture-c1t.pages.dev",
     process.env.CLIENT_URL, // fallback từ env
   ].filter(Boolean);
 
