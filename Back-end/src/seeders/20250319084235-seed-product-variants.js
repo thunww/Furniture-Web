@@ -73,8 +73,7 @@ module.exports = {
         material: "Velvet/Metal",
         price: 4990000,
         stock: 30,
-        image_url:
-          "https://images.unsplash.com/photo-1598300183815-4435b94f7d71?q=80&w=1200",
+        image_url: "https://govi.vn/wp-content/uploads/2023/03/JD-V15B-ct1.jpg",
       },
       {
         size: null,
@@ -83,7 +82,7 @@ module.exports = {
         price: 4990000,
         stock: 20,
         image_url:
-          "https://images.unsplash.com/photo-1598300183815-4435b94f7d71?q=80&w=1200",
+          "https://govi.vn/wp-content/uploads/2023/03/FU8021-1-ct1.jpg",
       },
     ]);
 
@@ -95,7 +94,7 @@ module.exports = {
         price: 2890000,
         stock: 40,
         image_url:
-          "https://images.unsplash.com/photo-1600490036275-35f5f162c37f?q=80&w=1200",
+          "https://nhaxinh.com/wp-content/uploads/2021/10/Ban-nuoc-tron-Opal-mat-da-tron-O900.jpg",
       },
     ]);
 
@@ -187,7 +186,7 @@ module.exports = {
         price: 1490000,
         stock: 50,
         image_url:
-          "https://images.unsplash.com/photo-1626986021249-1d9f1ba58828?q=80&w=1200",
+          "https://spacet-release.s3.ap-southeast-1.amazonaws.com/img/product/2024-08-09/tu-dau-giuong-2-ngan-keo-12933-0-66b5e957f12a11f6de041e06.webp",
       },
       {
         size: "45 x 40 x 50 cm",
@@ -221,7 +220,7 @@ module.exports = {
         price: 2290000,
         stock: 40,
         image_url:
-          "https://images.unsplash.com/photo-1616594039964-3f5ad7887e24?q=80&w=1200",
+          "https://product.hstatic.net/200000666677/product/ke_de_do_ks05-80-01_0deffbd2260145dcbc118df899fe37c6_master.jpg",
       },
     ]);
 
@@ -233,7 +232,7 @@ module.exports = {
         price: 3190000,
         stock: 25,
         image_url:
-          "https://images.unsplash.com/photo-1616594039964-3f5ad7887e24?q=80&w=1200",
+          "https://noithatminhkhoi.com/upload/images/tu-giay-2-canh-da-nang.jpg",
       },
     ]);
 
@@ -271,7 +270,7 @@ module.exports = {
         price: 2190000,
         stock: 20,
         image_url:
-          "https://images.unsplash.com/photo-1578898887932-0c7b1e8f1a1a?q=80&w=1200",
+          "https://pula.vn/storage/images/2023/10/31/o1cn01b8wmsk1wopvwty5wq-22159287.webp",
       },
     ]);
 
@@ -295,7 +294,7 @@ module.exports = {
         price: 990000,
         stock: 35,
         image_url:
-          "https://images.unsplash.com/photo-1602526218233-9d5a8b1d0f9d?q=80&w=1200",
+          "https://tse1.mm.bing.net/th/id/OIP.nvbquxuPy1vn2PwrosrIfgHaHa?cb=ucfimg2ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3",
       },
     ]);
 
@@ -358,7 +357,7 @@ module.exports = {
         price: 3290000,
         stock: 18,
         image_url:
-          "https://images.unsplash.com/photo-1619910178103-9f40f3cfd540?q=80&w=1200",
+          "https://nhaxinh.com/wp-content/uploads/2021/11/nha-xinh-ban-console.jpg",
       },
     ]);
 
@@ -370,7 +369,7 @@ module.exports = {
         price: 690000,
         stock: 60,
         image_url:
-          "https://images.unsplash.com/photo-1620684146828-37f964bc5c67?q=80&w=1200",
+          "https://i.pinimg.com/originals/7f/92/3b/7f923b1fa2b5085adfa5179a12c66d7a.jpg",
       },
     ]);
 
