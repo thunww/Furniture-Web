@@ -349,7 +349,7 @@ const loginWithGoogle = async (googleToken) => {
 const forgotPassword = async (email) => {
   const user = await User.findOne({ where: { email } });
 
-  // Delay để đồng bộ phản hồi
+  // Delay để đồng bộ phản hồi (chống timing attack)
   await new Promise((r) => setTimeout(r, 400 + Math.random() * 300));
 
   if (!user) {
@@ -362,8 +362,16 @@ const forgotPassword = async (email) => {
     };
   }
 
-  const resetToken = generateToken({ userId: user.user_id }, "1h");
-  await sendResetPasswordEmail(email, resetToken);
+  // ✅ FIX: Dùng user_id thay vì userId
+  const resetToken = generateToken({ user_id: user.user_id }, "1h");
+
+  try {
+    await sendResetPasswordEmail(email, resetToken);
+    console.log(`[INFO] Reset password email sent to: ${email}`);
+  } catch (error) {
+    console.error("[ERROR] Failed to send reset email:", error.message);
+    // Vẫn return generic message để không lộ thông tin
+  }
 
   return {
     message:
@@ -373,16 +381,62 @@ const forgotPassword = async (email) => {
 
 // ========================== RESET PASSWORD ==========================
 const resetPassword = async (token, newPassword) => {
-  if (!token) throw new Error("Thiếu token đặt lại mật khẩu.");
+  // ✅ Validate inputs
+  if (!token) {
+    throw new Error("Thiếu token đặt lại mật khẩu.");
+  }
 
-  const decoded = verifyToken(token);
-  const userId = decoded.userId;
+  if (!newPassword) {
+    throw new Error("Mật khẩu mới không được để trống.");
+  }
+
+  if (newPassword.length < 6) {
+    throw new Error("Mật khẩu phải có ít nhất 6 ký tự.");
+  }
+
+  // ✅ Verify token
+  let decoded;
+  try {
+    decoded = verifyToken(token);
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      throw new Error(
+        "Token đã hết hạn. Vui lòng yêu cầu đặt lại mật khẩu mới."
+      );
+    }
+    throw new Error("Token không hợp lệ.");
+  }
+
+  // ✅ FIX: Dùng user_id thay vì userId
+  const userId = decoded.user_id;
+
+  if (!userId) {
+    throw new Error("Token không hợp lệ.");
+  }
+
+  // ✅ Find user
   const user = await User.findOne({ where: { user_id: userId } });
-  if (!user) throw new Error("Không tìm thấy tài khoản.");
 
+  if (!user) {
+    throw new Error("Không tìm thấy tài khoản.");
+  }
+
+  // ✅ Check if account is banned
+  if (user.status === "banned") {
+    throw new Error("Tài khoản bị khóa. Vui lòng liên hệ hỗ trợ.");
+  }
+
+  // ✅ Hash and save new password
   const hashedPassword = await hashPassword(newPassword);
-  user.password = hashedPassword;
-  await user.save();
+  await user.update({
+    password: hashedPassword,
+    // Optional: Reset login attempts khi đổi password
+    login_attempts: 0,
+    locked_until: null,
+    last_failed_login: null,
+  });
+
+  console.log(`[INFO] Password reset successful for user: ${user.email}`);
 
   return "Mật khẩu đã được thay đổi thành công.";
 };

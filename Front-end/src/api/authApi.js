@@ -10,6 +10,12 @@ const authApi = {
   getProfile: () => axiosClient.get("/auth/profile"),
   loginWithGoogle: (googleToken) =>
     axiosClient.post("/auth/google", { googleToken }),
+  // ========================== PASSWORD ==========================
+  forgotPassword: (email) =>
+    axiosClient.post("/auth/forgot-password", { email }),
+
+  resetPassword: (token, newPassword) =>
+    axiosClient.post("/auth/reset-password", { token, newPassword }),
 };
 
 export default authApi;
