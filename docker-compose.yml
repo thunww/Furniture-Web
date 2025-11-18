@@ -10,7 +10,8 @@ services:
       - "443:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/ssl:/etc/ssl   # chứa cloudflare.pem + cloudflare.key
+      - ./nginx/ssl/cloudflare.pem:/etc/ssl/certs/cloudflare.pem
+      - ./nginx/ssl/cloudflare.key:/etc/ssl/private/cloudflare.key
     depends_on:
       - backend
     networks:
@@ -21,7 +22,7 @@ services:
     container_name: backend
     restart: always
     expose:
-      - "5000"     # chỉ hiển thị trong internal network
+      - "5000"
     env_file:
       - ./Back-end/docker.env
     networks:
