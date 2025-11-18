@@ -27,7 +27,7 @@ const shipperRoutes = require("./routes/shipperRoutes");
 const { handleUploadError } = require("./middleware/upload");
 
 const app = express();
-
+app.set("trust proxy", 1);
 /* ---------------------- SECURITY CONFIG ---------------------- */
 app.use(
   helmet({
