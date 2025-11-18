@@ -7,7 +7,7 @@ const OrdersTable = ({ orders, onOrderUpdate }) => {
   const [activeTab, setActiveTab] = useState("active");
 
   useEffect(() => {
-    console.log("All orders:", orders);
+    //console.log("All orders:", orders);
     console.log(
       "Order statuses:",
       orders.map((order) => ({

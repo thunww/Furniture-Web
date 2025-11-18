@@ -95,14 +95,14 @@ const ProductUpdateInterface = () => {
   useEffect(() => {
     const fetchProductData = async () => {
       try {
-        console.log("Bắt đầu fetch dữ liệu với productId:", productId);
+        //console.log("Bắt đầu fetch dữ liệu với productId:", productId);
         setLoading(true);
         const response = await productApi.getProductById(productId);
-        console.log("Response từ API:", response);
+        //console.log("Response từ API:", response);
 
         if (response.data.success) {
           const product = response.data.data;
-          console.log("Dữ liệu sản phẩm:", product);
+          //console.log("Dữ liệu sản phẩm:", product);
           setProductData({
             id: product.product_id,
             name: product.product_name,
@@ -154,11 +154,11 @@ const ProductUpdateInterface = () => {
     };
 
     if (productId) {
-      console.log("productId tồn tại, bắt đầu fetch dữ liệu");
+      //console.log("productId tồn tại, bắt đầu fetch dữ liệu");
       fetchProductData();
       fetchCategories();
     } else {
-      console.log("Không có productId");
+      //console.log("Không có productId");
     }
   }, [productId]);
 

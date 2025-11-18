@@ -43,7 +43,7 @@ const orderApi = {
 
   // Cập nhật trạng thái đơn hàng
   updateOrderStatus: (orderId, status) => {
-    console.log(`API call: Update order ${orderId} status to ${status}`);
+    //console.log(`API call: Update order ${orderId} status to ${status}`);
     // Validate inputs to prevent API errors
     if (!orderId) {
       console.error("Missing orderId in updateOrderStatus API call");

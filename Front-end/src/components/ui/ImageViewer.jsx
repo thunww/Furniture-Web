@@ -38,7 +38,7 @@ const ImageViewer = ({
       try {
         // Phương án 1: Sử dụng hình ảnh đã được truyền vào component
         if (images && images.length > 0) {
-          console.log("Using provided images:", images);
+          //console.log("Using provided images:", images);
           setLoadedImages(
             images.map((img, index) => ({
               url: typeof img === "string" ? img : img.url,
@@ -52,7 +52,7 @@ const ImageViewer = ({
 
         // Phương án 2: Sử dụng imageUrl được truyền vào
         if (imageUrl) {
-          console.log("Using provided imageUrl:", imageUrl);
+          //console.log("Using provided imageUrl:", imageUrl);
           setLoadedImages([
             {
               url: imageUrl,
@@ -67,7 +67,7 @@ const ImageViewer = ({
         // Phương án 3: Gọi API nếu có productId
         if (productId) {
           try {
-            console.log("Fetching images for product ID:", productId);
+            // console.log("Fetching images for product ID:", productId);
             const token = localStorage.getItem("accessToken");
 
             // Gọi API lấy danh sách sản phẩm trực tiếp
@@ -96,7 +96,7 @@ const ImageViewer = ({
               throw new Error(`Không tìm thấy sản phẩm với ID: ${productId}`);
             }
 
-            console.log("Found product:", product);
+            // console.log("Found product:", product);
 
             // Xử lý ảnh từ dữ liệu sản phẩm
             const productImages = [];
@@ -195,7 +195,7 @@ const ImageViewer = ({
     // Fallback to imageUrl if available
     const fallbackToProvidedImage = () => {
       if (imageUrl) {
-        console.log("Fallback to imageUrl:", imageUrl);
+        //console.log("Fallback to imageUrl:", imageUrl);
         setLoadedImages([
           {
             url: imageUrl,

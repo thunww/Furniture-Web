@@ -4,8 +4,6 @@ import { useSelector } from "react-redux";
 const PrivateRoute = ({ allowedRoles }) => {
   const { user, roles, isLoading } = useSelector((state) => state.auth);
 
-  console.log("PrivateRoute check:", { user, roles, isLoading });
-
   // 🕐 Chờ redux load xong (tránh redirect sai khi F5)
   if (isLoading) {
     return (

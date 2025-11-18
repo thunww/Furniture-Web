@@ -3,8 +3,6 @@ import axios from "axios";
 // 🔗 API_URL đến từ file .env hoặc .env.local
 const API_URL = import.meta.env.VITE_API_URL;
 
-console.log("🔗 FE đang dùng API:", API_URL);
-
 const axiosClient = axios.create({
   baseURL: API_URL,
   headers: {

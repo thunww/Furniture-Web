@@ -286,7 +286,7 @@ const CartPage = () => {
     navigate("/");
   };
 
-  console.log("Current cart items:", items);
+  //console.log("Current cart items:", items);
 
   // HardCoded JSX để kiểm tra hiển thị
   const renderHardCodedCart = () => (
