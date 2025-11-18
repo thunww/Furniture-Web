@@ -2,8 +2,25 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Lock, ArrowRight, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
-import authService from "../../services/authService"; // ✅ Import authService
+import authService from "../../services/authService";
 import "react-toastify/dist/ReactToastify.css";
+
+// 🟢 Hàm kiểm tra mật khẩu mạnh
+const isStrongPassword = (password) => {
+  const minLength = /.{8,}/;
+  const lowercase = /[a-z]/;
+  const uppercase = /[A-Z]/;
+  const number = /[0-9]/;
+  const special = /[^A-Za-z0-9]/;
+
+  return (
+    minLength.test(password) &&
+    lowercase.test(password) &&
+    uppercase.test(password) &&
+    number.test(password) &&
+    special.test(password)
+  );
+};
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -16,102 +33,77 @@ const ResetPassword = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ✅ Lấy token từ URL khi component mount
+  // 🟢 Lấy token từ URL
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const urlToken = queryParams.get("token");
 
     if (urlToken) {
-      console.log("Token retrieved from URL:", urlToken);
       setToken(urlToken);
     } else {
-      console.error("No token found in URL");
       toast.error("Token không hợp lệ hoặc bị thiếu!");
       setTokenValid(false);
     }
   }, [location]);
 
-  // ✅ Validate password strength
-  const validatePassword = (password) => {
-    if (password.length < 6) {
-      return "Mật khẩu phải có ít nhất 6 ký tự";
-    }
-    return null;
-  };
-
+  // 🟢 Submit Reset Password
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Validate inputs
+    // Required fields
     if (!newPassword.trim() || !confirmPassword.trim()) {
-      toast.error("Vui lòng nhập đầy đủ thông tin!", { position: "top-right" });
+      toast.error("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
 
-    // ✅ Check password length
-    const passwordError = validatePassword(newPassword);
-    if (passwordError) {
-      toast.error(passwordError, { position: "top-right" });
+    // Strong password check
+    if (!isStrongPassword(newPassword)) {
+      toast.error(
+        "Mật khẩu mới nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để tăng bảo mật."
+      );
       return;
     }
 
-    // ✅ Check password match
+    // Confirm password match
     if (newPassword !== confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp!", { position: "top-right" });
+      toast.error("Mật khẩu xác nhận không khớp!");
       return;
     }
 
-    // ✅ Check token exists
     if (!token) {
-      toast.error("Token không hợp lệ hoặc bị thiếu!", {
-        position: "top-right",
-      });
+      toast.error("Token không hợp lệ hoặc bị thiếu!");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // ✅ Sử dụng authService thay vì axios trực tiếp
       const response = await authService.resetPassword(token, newPassword);
 
       toast.success(response.message || "Đặt lại mật khẩu thành công!", {
-        position: "top-right",
         autoClose: 2000,
       });
 
       setIsSuccess(true);
 
-      // ✅ Redirect về login sau 2 giây
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      console.error("Reset password error:", err);
-
-      // ✅ Xử lý error message chi tiết
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
         "Đã xảy ra lỗi! Vui lòng thử lại.";
 
-      toast.error(errorMessage, {
-        position: "top-right",
-        autoClose: 4000,
-      });
+      toast.error(errorMessage);
 
-      // ✅ Nếu token expired, redirect về forgot password
       if (err.response?.data?.expired) {
-        setTimeout(() => {
-          navigate("/forgot-password");
-        }, 4000);
+        setTimeout(() => navigate("/forgot-password"), 4000);
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ✅ Nếu không có token, hiển thị error screen
+  // 🟠 Token invalid screen
   if (!tokenValid) {
     return (
       <div className="flex justify-center items-center h-full p-8 bg-gradient-to-br from-blue-50 to-purple-100">
@@ -135,7 +127,7 @@ const ResetPassword = () => {
     );
   }
 
-  // ✅ Nếu đã success, hiển thị success screen
+  // 🟢 Success screen
   if (isSuccess) {
     return (
       <div className="flex justify-center items-center h-full p-8 bg-gradient-to-br from-blue-50 to-purple-100">
@@ -154,12 +146,12 @@ const ResetPassword = () => {
     );
   }
 
-  // ✅ Main form
+  // 🟢 Main Reset Password Form
   return (
     <div className="flex justify-center items-center h-full p-8 bg-gradient-to-br from-blue-50 to-purple-100">
       <div className="w-full max-w-6xl overflow-hidden rounded-3xl shadow-lg border border-gray-100 bg-white bg-opacity-90 backdrop-blur-md">
         <div className="flex flex-wrap">
-          {/* Left side - Image */}
+          {/* Left Image */}
           <div className="hidden md:block w-1/2 relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <img
@@ -170,7 +162,7 @@ const ResetPassword = () => {
             </div>
           </div>
 
-          {/* Right side - Reset Password Form */}
+          {/* Right Form */}
           <div className="w-full md:w-1/2 bg-white p-8 bg-gradient-to-br from-white to-blue-50">
             <div className="max-w-md mx-auto">
               <div className="flex items-center mb-8">
@@ -193,20 +185,24 @@ const ResetPassword = () => {
                     Mật khẩu mới
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-indigo-400" />
-                    </div>
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
                       type="password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none transition duration-150 bg-white shadow-sm"
-                      placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
-                      required
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white shadow-sm"
+                      placeholder="Nhập mật khẩu mới"
                       disabled={isLoading}
-                      minLength={6}
                     />
                   </div>
+
+                  {/* GỢI Ý MẬT KHẨU MẠNH */}
+                  {newPassword && !isStrongPassword(newPassword) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Mật khẩu mới nên dài tối thiểu 8 ký tự, bao gồm chữ hoa,
+                      chữ thường, số và ký tự đặc biệt để tăng bảo mật.
+                    </p>
+                  )}
                 </div>
 
                 {/* Confirm Password */}
@@ -215,26 +211,29 @@ const ResetPassword = () => {
                     Xác nhận mật khẩu
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-indigo-400" />
-                    </div>
+                    <Lock className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none transition duration-150 bg-white shadow-sm"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white shadow-sm"
                       placeholder="Nhập lại mật khẩu mới"
-                      required
                       disabled={isLoading}
-                      minLength={6}
                     />
                   </div>
+
+                  {confirmPassword && confirmPassword !== newPassword && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Mật khẩu xác nhận phải giống với mật khẩu mới.
+                    </p>
+                  )}
                 </div>
 
+                {/* Submit */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 shadow-md transition disabled:opacity-50"
                 >
                   {isLoading ? (
                     <>
@@ -254,7 +253,7 @@ const ResetPassword = () => {
                 Nhớ mật khẩu rồi?{" "}
                 <button
                   onClick={() => navigate("/login")}
-                  className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline transition duration-150"
+                  className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline"
                 >
                   Đăng nhập ngay
                 </button>
@@ -263,6 +262,7 @@ const ResetPassword = () => {
           </div>
         </div>
       </div>
+
       <ToastContainer />
     </div>
   );

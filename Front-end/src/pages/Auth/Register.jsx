@@ -7,6 +7,23 @@ import { ToastContainer, toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 import "react-toastify/dist/ReactToastify.css";
 
+// 🟢 Hàm kiểm tra mật khẩu mạnh
+const isStrongPassword = (password) => {
+  const minLength = /.{8,}/;
+  const lowercase = /[a-z]/;
+  const uppercase = /[A-Z]/;
+  const number = /[0-9]/;
+  const special = /[^A-Za-z0-9]/;
+
+  return (
+    minLength.test(password) &&
+    lowercase.test(password) &&
+    uppercase.test(password) &&
+    number.test(password) &&
+    special.test(password)
+  );
+};
+
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -17,12 +34,12 @@ const Register = () => {
   const navigate = useNavigate();
   const { message, error, isLoading } = useSelector((state) => state.auth);
 
-  // Reset thông báo
+  // 🟢 Reset message khi vào trang
   useEffect(() => {
     dispatch(resetMessage());
   }, [dispatch]);
 
-  // Hiển thị toast
+  // 🟢 Toast feedback
   useEffect(() => {
     if (message) {
       toast.success(message, {
@@ -41,22 +58,26 @@ const Register = () => {
     }
   }, [message, error, navigate, dispatch]);
 
-  // Submit đăng ký
+  // 🟢 Submit Register
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !username.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim()
-    ) {
-      toast.error("Vui lòng nhập đầy đủ thông tin!", { position: "top-right" });
+    if (!username || !email || !password || !confirmPassword) {
+      toast.error("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
 
+    // Kiểm tra mật khẩu mạnh
+    if (!isStrongPassword(password)) {
+      toast.error(
+        "Mật khẩu nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để tăng bảo mật."
+      );
+      return;
+    }
+
+    // Kiểm tra xác nhận mật khẩu
     if (password !== confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp!", { position: "top-right" });
+      toast.error("Mật khẩu xác nhận không khớp!");
       return;
     }
 
@@ -68,9 +89,7 @@ const Register = () => {
     try {
       await dispatch(loginWithGoogle(credentialResponse.credential)).unwrap();
       toast.success("Đăng ký / đăng nhập Google thành công!");
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       toast.error(err || "Đăng ký Google thất bại");
     }
@@ -117,7 +136,7 @@ const Register = () => {
                     <User className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
                       type="text"
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white shadow-sm"
                       placeholder="Enter your full name"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
@@ -135,7 +154,7 @@ const Register = () => {
                     <Mail className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
                       type="email"
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white shadow-sm"
                       placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -153,13 +172,21 @@ const Register = () => {
                     <Lock className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
                       type="password"
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white shadow-sm"
                       placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                     />
                   </div>
+
+                  {/* GỢI Ý MẬT KHẨU MẠNH */}
+                  {password && !isStrongPassword(password) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Mật khẩu nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ
+                      thường, số và ký tự đặc biệt để tăng bảo mật.
+                    </p>
+                  )}
                 </div>
 
                 {/* Confirm Password */}
@@ -171,19 +198,26 @@ const Register = () => {
                     <Lock className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
                       type="password"
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 bg-white shadow-sm"
                       placeholder="Confirm your password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                     />
                   </div>
+
+                  {/* GỢI Ý XÁC NHẬN */}
+                  {confirmPassword && confirmPassword !== password && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Mật khẩu xác nhận phải giống mật khẩu đã nhập.
+                    </p>
+                  )}
                 </div>
 
-                {/* Nút đăng ký */}
+                {/* Submit */}
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 shadow-md"
+                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 shadow-md transition"
                   disabled={isLoading}
                 >
                   {isLoading ? "Đang đăng ký..." : "Register"}
@@ -203,7 +237,7 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* Google Login */}
+              {/* Google login */}
               <div className="flex justify-center mb-6">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
@@ -220,7 +254,7 @@ const Register = () => {
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline transition duration-150"
+                  className="text-indigo-600 font-medium hover:underline"
                 >
                   Login here
                 </Link>
@@ -229,6 +263,7 @@ const Register = () => {
           </div>
         </div>
       </div>
+
       <ToastContainer />
     </div>
   );

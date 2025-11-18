@@ -7,6 +7,23 @@ import { GoogleLogin } from "@react-oauth/google";
 import { ToastContainer, toast } from "react-toastify";
 import { login, loginWithGoogle, resetMessage } from "../../redux/authSlice";
 
+// 🟢 Hàm kiểm tra mật khẩu mạnh
+const isStrongPassword = (password) => {
+  const minLength = /.{8,}/;
+  const lowercase = /[a-z]/;
+  const uppercase = /[A-Z]/;
+  const number = /[0-9]/;
+  const special = /[^A-Za-z0-9]/;
+
+  return (
+    minLength.test(password) &&
+    lowercase.test(password) &&
+    uppercase.test(password) &&
+    number.test(password) &&
+    special.test(password)
+  );
+};
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,9 +48,7 @@ const Login = () => {
         autoClose: 2000,
         onClose: () => dispatch(resetMessage()),
       });
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
+      setTimeout(() => navigate("/"), 2000);
     }
     if (error) {
       toast.error(error, {
@@ -49,7 +64,15 @@ const Login = () => {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Vui lòng nhập đầy đủ thông tin!", { position: "top-right" });
+      toast.error("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
+    // 🟡 Gợi ý mật khẩu mạnh (KHÔNG bắt buộc khi login)
+    if (!isStrongPassword(password)) {
+      toast.error(
+        "Mật khẩu nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để tăng bảo mật."
+      );
       return;
     }
 
@@ -87,9 +110,7 @@ const Login = () => {
     try {
       await dispatch(loginWithGoogle(credentialResponse.credential)).unwrap();
       toast.success("Đăng nhập Google thành công!");
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       toast.error(err || "Đăng nhập Google thất bại");
     }
@@ -103,7 +124,7 @@ const Login = () => {
     <div className="flex justify-center items-center h-full p-8 bg-gradient-to-br from-blue-50 to-purple-100">
       <div className="w-full max-w-6xl overflow-hidden rounded-3xl shadow-lg border border-gray-100 bg-white bg-opacity-90 backdrop-blur-md">
         <div className="flex flex-wrap">
-          {/* Hình minh họa bên trái */}
+          {/* Hình minh họa */}
           <div className="hidden md:block w-1/2 relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <img
@@ -114,7 +135,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Form đăng nhập */}
+          {/* Form */}
           <div className="w-full md:w-1/2 bg-white p-8 bg-gradient-to-br from-white to-blue-50">
             <div className="max-w-md mx-auto">
               <div className="flex items-center mb-8">
@@ -124,7 +145,7 @@ const Login = () => {
                 <h2 className="text-3xl font-bold text-gray-800 ml-3">Login</h2>
               </div>
 
-              {/* 🔴 Tài khoản bị khóa */}
+              {/* 🔴 Account locked */}
               {isLocked && (
                 <div className="mb-4 rounded-lg bg-red-50 p-4 border border-red-200">
                   <div className="flex">
@@ -139,7 +160,7 @@ const Login = () => {
                 </div>
               )}
 
-              {/* 🟡 Cảnh báo cần CAPTCHA */}
+              {/* 🟡 Need CAPTCHA */}
               {needCaptcha && !isLocked && (
                 <div className="mb-4 rounded-lg bg-yellow-50 p-4 border border-yellow-200">
                   <div className="flex">
@@ -149,7 +170,7 @@ const Login = () => {
                         Yêu cầu xác minh bảo mật
                       </h3>
                       <p className="mt-1 text-sm text-yellow-700">
-                        Vui lòng hoàn thành xác minh CAPTCHA để tiếp tục.
+                        Vui lòng hoàn thành CAPTCHA để tiếp tục.
                       </p>
                     </div>
                   </div>
@@ -158,6 +179,7 @@ const Login = () => {
 
               {/* Form login */}
               <form className="space-y-5" onSubmit={handleSubmit}>
+                {/* Email */}
                 <div>
                   <label className="block text-gray-700 font-medium mb-1">
                     Email
@@ -168,16 +190,17 @@ const Login = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm disabled:bg-gray-100"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
                       placeholder="Enter your email"
                       disabled={isLoading || isLocked}
                     />
                   </div>
                 </div>
 
+                {/* Password */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="block text-gray-700 font-medium">
+                    <label className="text-gray-700 font-medium">
                       Password
                     </label>
                     <Link
@@ -193,23 +216,30 @@ const Login = () => {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm disabled:bg-gray-100"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
                       placeholder="Enter your password"
                       disabled={isLoading || isLocked}
                     />
                   </div>
+
+                  {/* GỢI Ý ĐỘ MẠNH MẬT KHẨU */}
+                  {password && !isStrongPassword(password) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Mật khẩu nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ
+                      thường, số và ký tự đặc biệt để tăng bảo mật.
+                    </p>
+                  )}
                 </div>
 
-                {/* Remember Me */}
+                {/* Remember me */}
                 <div className="flex items-center">
                   <input
                     id="remember-me"
-                    name="remember-me"
                     type="checkbox"
                     checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
+                    onChange={() => setRememberMe(!rememberMe)}
+                    className="h-4 w-4 text-indigo-600"
                     disabled={isLocked}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:cursor-not-allowed"
                   />
                   <label
                     htmlFor="remember-me"
@@ -219,9 +249,10 @@ const Login = () => {
                   </label>
                 </div>
 
+                {/* Submit */}
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition"
                   disabled={isLoading || isExecutingCaptcha || isLocked}
                 >
                   {isLoading || isExecutingCaptcha ? (
@@ -233,37 +264,16 @@ const Login = () => {
                     </span>
                   ) : (
                     <>
-                      Login
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      Login <ArrowRight className="ml-2 h-5 w-5" />
                     </>
                   )}
                 </button>
               </form>
 
-              {/* reCAPTCHA notice */}
+              {/* reCAPTCHA warning */}
               {(needCaptcha || attempts >= 3) && !isLocked && (
                 <div className="mt-4 text-xs text-center text-gray-500">
-                  <p>
-                    Trang này được bảo vệ bởi reCAPTCHA và tuân theo{" "}
-                    <a
-                      href="https://policies.google.com/privacy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 hover:underline"
-                    >
-                      Chính sách Bảo mật
-                    </a>{" "}
-                    và{" "}
-                    <a
-                      href="https://policies.google.com/terms"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 hover:underline"
-                    >
-                      Điều khoản Dịch vụ
-                    </a>{" "}
-                    của Google.
-                  </p>
+                  Trang này được bảo vệ bởi reCAPTCHA.
                 </div>
               )}
 
@@ -279,7 +289,7 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Google Login Button */}
+              {/* Google Login */}
               <div className="flex justify-center mb-6">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
@@ -297,7 +307,7 @@ const Login = () => {
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline transition duration-150"
+                  className="text-indigo-600 font-medium hover:underline"
                 >
                   Sign up now
                 </Link>
