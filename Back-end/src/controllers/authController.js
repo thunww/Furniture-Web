@@ -12,10 +12,13 @@ const {
 const { verifyToken } = require("../config/jwt");
 require("dotenv").config();
 
+const isProd = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  secure: isProd ? true : false,
+  sameSite: isProd ? "None" : "Lax",
+  domain: isProd ? process.env.COOKIE_DOMAIN : undefined,
   path: "/",
 };
 
@@ -296,6 +299,7 @@ const handleResetPassword = async (req, res) => {
     });
   }
 };
+
 // ========================== LOGOUT ==========================
 const handleLogout = async (req, res) => {
   try {
