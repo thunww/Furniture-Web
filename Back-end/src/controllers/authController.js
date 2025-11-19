@@ -17,8 +17,8 @@ const isProd = process.env.NODE_ENV === "production";
 const cookieOptions = {
   httpOnly: true,
   secure: isProd ? true : false,
-  sameSite: isProd ? "None" : "Lax",
-  domain: isProd ? process.env.COOKIE_DOMAIN : undefined,
+  sameSite: "None", // DEV và PROD đều phải None
+  domain: isProd ? process.env.COOKIE_DOMAIN : "localhost",
   path: "/",
 };
 

@@ -10,19 +10,12 @@ function App() {
   const dispatch = useDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // ✅ Kiểm tra cookie trước khi gọi getProfile
   const checkAuth = async () => {
-    // Kiểm tra xem có accessToken hoặc refreshToken trong cookie không
-    const hasAccessToken = document.cookie.includes("accessToken=");
-    const hasRefreshToken = document.cookie.includes("refreshToken=");
-
-    // ✅ CHỈ gọi getProfile nếu có token
-    if (hasAccessToken || hasRefreshToken) {
-      try {
-        await dispatch(getProfile()).unwrap();
-      } catch (error) {
-        console.log("Auth check: User not authenticated");
-      }
+    try {
+      // FE không thể kiểm tra cookie → luôn gọi getProfile
+      await dispatch(getProfile()).unwrap();
+    } catch (_) {
+      // Không làm gì, user không đăng nhập → ok
     }
 
     setIsInitialized(true);
@@ -30,9 +23,8 @@ function App() {
 
   useEffect(() => {
     checkAuth();
-  }, [dispatch]);
+  }, []);
 
-  // Hiển thị loading khi đang check auth lần đầu
   if (!isInitialized) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-purple-100">
