@@ -139,15 +139,26 @@ const handleUploadAvatar = async (req, res) => {
 // ========================== GET PROFILE ==========================
 const handleGetProfile = async (req, res) => {
   try {
-    // ⭐ Chỉ dùng user_id lấy từ authMiddleware
-    const profile = await getUserProfile(req.user.user_id);
+    const result = await getUserProfile(req.user.user_id);
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     return res.status(200).json({
+      success: true,
       message: "Profile retrieved successfully",
-      user: profile,
+      user: result.user,
     });
   } catch (error) {
-    return res.status(401).json({ message: error.message });
+    console.error("handleGetProfile error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 

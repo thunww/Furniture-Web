@@ -199,23 +199,52 @@ const uploadAvatar = async (user_id, imageUrl) => {
 };
 
 const getUserProfile = async (userId) => {
-  const user = await User.findOne({
-    where: { user_id: userId },
-    attributes: ["user_id", "username", "email", "status", "is_verified"],
-  });
+  try {
+    const user = await User.findOne({
+      where: { user_id: userId },
+      attributes: [
+        "user_id",
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "phone",
+        "gender",
+        "date_of_birth",
+        "profile_picture",
+        "status",
+        "is_verified",
+        "created_at",
+        "updated_at",
+      ],
+      include: [
+        {
+          model: Role,
+          as: "roles",
+          attributes: ["role_name"],
+          through: { attributes: [] },
+        },
+      ],
+    });
 
-  if (!user) throw new Error("User not found");
+    if (!user) {
+      return { success: false, user: null };
+    }
 
-  const userRoles = await UserRole.findAll({ where: { user_id: userId } });
-  const roleIds = userRoles.map((ur) => ur.role_id);
+    // Convert to plain object
+    const userData = user.get({ plain: true });
 
-  const roles = await Role.findAll({ where: { role_id: roleIds } });
-  const roleNames = roles.map((r) => r.role_name);
-
-  return {
-    ...user.dataValues,
-    roles: roleNames,
-  };
+    return {
+      success: true,
+      user: {
+        ...userData,
+        roles: userData.roles.map((r) => r.role_name),
+      },
+    };
+  } catch (error) {
+    console.error("getUserProfile error:", error);
+    return { success: false, user: null };
+  }
 };
 
 module.exports = {
