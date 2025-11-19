@@ -27,13 +27,13 @@ const ProductReviewSection = ({ productId }) => {
     }));
   };
 
-  // Filter only verified reviews
+  // Chỉ lấy đánh giá đã xác minh
   const verifiedReviews = useMemo(() => {
     if (!Array.isArray(reviews)) return [];
     return reviews.filter((review) => review.is_verified === true);
   }, [reviews]);
 
-  // Calculate average rating for verified reviews
+  // Tính điểm trung bình
   const averageRating = useMemo(() => {
     if (verifiedReviews.length === 0) return 0;
     return (
@@ -42,25 +42,24 @@ const ProductReviewSection = ({ productId }) => {
     ).toFixed(1);
   }, [verifiedReviews]);
 
-  // Paginate verified reviews
+  // Phân trang
   const paginatedReviews = useMemo(() => {
     return verifiedReviews.slice(0, page * reviewsPerPage);
   }, [verifiedReviews, page]);
 
-  // Handle load more
   const handleLoadMore = () => {
     setPage((prev) => prev + 1);
   };
 
-  // Handle error state
+  // Lỗi tải dữ liệu
   if (error) {
     return (
       <div className="mt-12 border-t pt-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-8">
-          Product Reviews
+          Đánh giá sản phẩm
         </h2>
         <div className="bg-red-50 rounded-lg p-6 text-center">
-          <p className="text-red-500">Failed to load reviews: {error}</p>
+          <p className="text-red-500">Không thể tải đánh giá: {error}</p>
         </div>
       </div>
     );
@@ -69,7 +68,8 @@ const ProductReviewSection = ({ productId }) => {
   return (
     <div className="mt-12 border-t pt-8">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">Product Reviews</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Đánh giá sản phẩm</h2>
+
         {verifiedReviews.length > 0 && (
           <div className="flex items-center gap-2">
             <div className="flex text-yellow-500 text-lg">
@@ -78,7 +78,7 @@ const ProductReviewSection = ({ productId }) => {
             </div>
             <span className="font-medium">{averageRating}/5</span>
             <span className="text-gray-500">
-              ({verifiedReviews.length} verified reviews)
+              ({verifiedReviews.length} đánh giá đã xác minh)
             </span>
           </div>
         )}
@@ -100,7 +100,7 @@ const ProductReviewSection = ({ productId }) => {
       ) : verifiedReviews.length === 0 ? (
         <div className="bg-gray-50 rounded-lg p-6 text-center">
           <p className="text-gray-500">
-            No verified reviews yet. Be the first to leave a verified review!
+            Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!
           </p>
         </div>
       ) : (
@@ -131,7 +131,7 @@ const ProductReviewSection = ({ productId }) => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h4 className="font-semibold text-gray-800">
-                          {review.user?.username || "Anonymous"}
+                          {review.user?.username || "Người dùng"}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <div className="text-yellow-500">
@@ -143,10 +143,11 @@ const ProductReviewSection = ({ productId }) => {
                           </span>
                         </div>
                       </div>
+
                       <span className="text-sm text-gray-500">
                         {review.created_at
-                          ? dayjs(review.created_at).format("MMM D, YYYY")
-                          : "Unknown Date"}
+                          ? dayjs(review.created_at).format("DD/MM/YYYY")
+                          : "Không rõ ngày"}
                       </span>
                     </div>
 
@@ -162,23 +163,24 @@ const ProductReviewSection = ({ productId }) => {
                             onClick={() => toggleExpandReview(review.review_id)}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-1"
                           >
-                            {isExpanded ? "Show less" : "Read more"}
+                            {isExpanded ? "Thu gọn" : "Xem thêm"}
                           </button>
                         </>
                       ) : (
                         <p className="text-gray-700">
-                          {review.comment || "No comment provided"}
+                          {review.comment || "Không có nội dung đánh giá."}
                         </p>
                       )}
                     </div>
 
+                    {/* Hình ảnh đánh giá */}
                     {review.images && Array.isArray(review.images) ? (
                       <div className="mt-4 flex gap-2">
                         {review.images.map((img, index) => (
                           <img
                             key={index}
                             src={img}
-                            alt={`Review attachment ${index + 1}`}
+                            alt={`Review image ${index + 1}`}
                             className="w-24 h-24 rounded-lg border border-gray-200 object-cover hover:opacity-90 transition-opacity cursor-pointer"
                             onError={(e) => (e.target.src = "/placeholder.png")}
                           />
@@ -208,7 +210,7 @@ const ProductReviewSection = ({ productId }) => {
             onClick={handleLoadMore}
             className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2 px-6 rounded-md transition-colors"
           >
-            Load more verified reviews
+            Xem thêm đánh giá
           </button>
         </div>
       )}

@@ -19,6 +19,23 @@ const {
 
 const router = express.Router();
 
+// ----------- STATIC ROUTES FIRST -------------
+router.put(
+  "/admin/users/ban",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  handleBanUser
+);
+
+router.put(
+  "/admin/users/unban",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  handleUnbanUser
+);
+
+// ---------------------------------------------
+
 router.get(
   "/admin/users",
   authMiddleware,
@@ -38,20 +55,6 @@ router.put(
   authMiddleware,
   roleMiddleware(["admin"]),
   handleAdminUpdateUser
-);
-
-router.put(
-  "/admin/users/ban",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  handleBanUser
-);
-
-router.put(
-  "/admin/users/unban",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  handleUnbanUser
 );
 
 router.get("/users/me", authMiddleware, handleGetProfile);

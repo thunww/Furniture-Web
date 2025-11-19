@@ -41,16 +41,31 @@ const normalizeCategory = (p) => {
   const hasAny = (arr) => arr.some((k) => src.includes(k));
 
   if (hasAny(["sofa", "armchair"])) return "Sofa & Armchair";
-  if (hasAny(["bàn ăn", "bàn trà", "bàn góc", "console", "bàn"]))
-    return "Bàn";
+  if (hasAny(["bàn ăn", "bàn trà", "bàn góc", "console", "bàn"])) return "Bàn";
   if (hasAny(["ghế ăn", "ghế bar", "đôn", "thư giãn", "ghế"])) return "Ghế";
   if (hasAny(["giường", "táp", "đầu giường", "nệm", "phòng ngủ"]))
     return "Giường ngủ";
-  if (hasAny(["tủ áo", "tủ", "kệ", "kệ sách", "tủ treo", "âm tường", "trưng bày"]))
+  if (
+    hasAny(["tủ áo", "tủ", "kệ", "kệ sách", "tủ treo", "âm tường", "trưng bày"])
+  )
     return "Tủ & kệ";
   if (hasAny(["bếp", "dụng cụ bếp", "thiết bị bếp"])) return "Bếp";
   if (hasAny(["đèn bàn", "đèn sàn", "đèn thả", "đèn"])) return "Đèn trang trí";
-  if (hasAny(["tranh", "gương", "bình", "lọ", "thảm", "tượng", "khung hình", "cây", "hoa", "gối", "nến"]))
+  if (
+    hasAny([
+      "tranh",
+      "gương",
+      "bình",
+      "lọ",
+      "thảm",
+      "tượng",
+      "khung hình",
+      "cây",
+      "hoa",
+      "gối",
+      "nến",
+    ])
+  )
     return "Hàng trang trí";
   if (hasAny(["ngoài trời", "outdoor"])) return "Ngoại thất";
 
@@ -149,10 +164,10 @@ const Home = () => {
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6">
             <div className="w-full lg:w-auto">
               <h2 className="text-[18px] sm:text-[20px] md:text-[22px] font-semibold">
-                Sản phẩm nội thất nổi bật
+                Bộ sưu tập nội thất nổi bật
               </h2>
               <p className="text-[12px] sm:text-[13px] md:text-[14px] text-gray-600">
-                Tuyển chọn cho không gian sống của bạn
+                Lựa chọn phù hợp cho mọi phong cách sống
               </p>
             </div>
 
@@ -215,11 +230,16 @@ const Home = () => {
           </h2>
 
           {visibleProducts.length === 0 ? (
-            <p className="text-gray-500">Chưa có sản phẩm phù hợp danh mục này.</p>
+            <p className="text-gray-500">
+              Chưa có sản phẩm phù hợp danh mục này.
+            </p>
           ) : (
             <div className="product-list grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 sm:gap-4">
               {currentProducts.map((product) => (
-                <ProductItem key={product.id || product._id} product={product} />
+                <ProductItem
+                  key={product.id || product._id}
+                  product={product}
+                />
               ))}
             </div>
           )}
@@ -238,10 +258,11 @@ const Home = () => {
               <button
                 key={i + 1}
                 onClick={() => handlePageChange(i + 1)}
-                className={`w-9 h-9 flex items-center justify-center rounded-full border ${currentPage === i + 1
-                  ? "bg-amber-600 text-white font-bold border-amber-600"
-                  : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                className={`w-9 h-9 flex items-center justify-center rounded-full border ${
+                  currentPage === i + 1
+                    ? "bg-amber-600 text-white font-bold border-amber-600"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
               >
                 {i + 1}
               </button>

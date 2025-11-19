@@ -74,6 +74,8 @@ const handleGetUserById = async (req, res) => {
 };
 
 const handleBanUser = async (req, res) => {
+  console.log("BODY BAN:", req.body);
+
   try {
     const { userId } = req.body;
 

@@ -136,7 +136,7 @@ const Header = () => {
             <li>
               <Tooltip title="Thông báo">
                 <IconButton>
-                  <StyledBadge badgeContent={10} color="secondary">
+                  <StyledBadge badgeContent={999} color="secondary">
                     <MdNotificationsNone className="text-black text-lg" />
                   </StyledBadge>
                 </IconButton>

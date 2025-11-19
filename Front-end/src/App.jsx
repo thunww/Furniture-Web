@@ -12,10 +12,11 @@ function App() {
 
   const checkAuth = async () => {
     try {
-      // FE không thể kiểm tra cookie → luôn gọi getProfile
+      // Luôn gọi profile → để BE tự xác định login hay chưa
       await dispatch(getProfile()).unwrap();
-    } catch (_) {
-      // Không làm gì, user không đăng nhập → ok
+    } catch (error) {
+      // Nếu BE trả needLogin → user chưa đăng nhập → bỏ qua
+      console.log("User is not logged in.");
     }
 
     setIsInitialized(true);

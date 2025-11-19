@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchAllUsers,
-  banUser,
-  unbanUser,
-  assignRoleToUser,
-} from "../../redux/adminSlice";
+import { fetchAllUsers, banUser, unbanUser } from "../../redux/adminSlice";
 
 import Table from "../../components/common/Table";
 import {
@@ -90,64 +85,6 @@ const ManageUsers = () => {
     });
   };
 
-  /* ---------------- ASSIGN ROLE (ADMIN/VENDOR/SHIPPER...) ---------------- */
-  const handleGrantPermission = (user_id) => {
-    Swal.fire({
-      title: "User permissions",
-      html: `
-        <div class="mb-3">
-          <p class="text-gray-700 mb-2">Select a role:</p>
-          <div class="flex flex-col gap-2">
-            <label class="inline-flex items-center">
-              <input type="radio" name="role" value="customer" checked>
-              <span class="ml-2">Customer</span>
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" name="role" value="admin">
-              <span class="ml-2">Admin</span>
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" name="role" value="vendor">
-              <span class="ml-2">Vendor</span>
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" name="role" value="shipper">
-              <span class="ml-2">Shipper</span>
-            </label>
-          </div>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: "Confirm",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const selectedRole = document.querySelector(
-          'input[name="role"]:checked'
-        ).value;
-
-        const roleMapping = {
-          admin: 1,
-          customer: 2,
-          shipper: 3,
-          vendor: 4,
-        };
-
-        dispatch(
-          assignRoleToUser({
-            userId: user_id,
-            roleId: roleMapping[selectedRole],
-          })
-        )
-          .unwrap()
-          .then(() => {
-            Swal.fire("Success!", "Role updated.", "success");
-            dispatch(fetchAllUsers());
-          })
-          .catch(() => Swal.fire("Error!", "Failed to assign role", "error"));
-      }
-    });
-  };
-
   /* ---------------- TABLE COLUMNS ---------------- */
   const columns = [
     { header: "ID", field: "user_id" },
@@ -210,13 +147,6 @@ const ManageUsers = () => {
             onClick={() => navigate(`/admin/view-user/${user.user_id}`)}
           >
             <FaEye />
-          </button>
-
-          <button
-            className="bg-green-500 text-white p-2 rounded-lg"
-            onClick={() => handleGrantPermission(user.user_id)}
-          >
-            <FaUserCheck />
           </button>
 
           {user.status === "banned" ? (
