@@ -107,7 +107,7 @@ const Register = () => {
           <div className="hidden md:block w-1/2 relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <img
-                src="./login.png"
+                src="./sign.png"
                 alt="Register visual"
                 className="h-full w-full object-contain hover:scale-102 transition-transform duration-700"
               />
