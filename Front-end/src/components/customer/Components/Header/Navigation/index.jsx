@@ -64,14 +64,22 @@ const PRODUCTS_COLS = [
   },
 ];
 
-// (Tùy chọn) Menu phòng – không bắt buộc dùng tới trong ví dụ này
+// (Tùy chọn) Menu phòng – nếu sau này cần thì dùng
 const ROOMS = [
   { label: "Phòng khách", categoryId: 1 },
   { label: "Phòng ăn", categoryId: 2 },
   { label: "Phòng ngủ", categoryId: 3 },
-  { label: "Phòng làm việc", categoryId: 30 }, // chỉnh theo ID thực
+  { label: "Phòng làm việc", categoryId: 30 },
   { label: "Phòng bếp", categoryId: 5 },
-  { label: "Ngoại thất", categoryId: 28 }, // nếu có
+  { label: "Ngoại thất", categoryId: 28 },
+];
+
+// Các mục chữ thêm cho thanh giữa, giống Nhà Xinh
+const NAV_EXTRA_ITEMS = [
+  { label: "PHÒNG", to: "/rooms" },
+  { label: "BỘ SƯU TẬP", to: "/collections" },
+  { label: "THIẾT KẾ NỘI THẤT", to: "/design-service" },
+  { label: "GÓC CẢM HỨNG", to: "/inspiration" },
 ];
 
 const Navigation = () => {
@@ -112,8 +120,9 @@ const Navigation = () => {
             <span className="truncate text-sm">Danh mục nội thất</span>
           </Button>
 
-          {/* Giữa: 1 mục lớn SẢN PHẨM */}
+          {/* Giữa: SẢN PHẨM + các mục chữ thêm */}
           <ul className="flex items-center gap-8">
+            {/* Mục SẢN PHẨM có mega menu */}
             <li className="relative group">
               <button className="text-[16px] font-semibold tracking-wide hover:text-amber-700 flex items-center gap-1">
                 SẢN PHẨM <span className="text-amber-600">▾</span>
@@ -145,9 +154,21 @@ const Navigation = () => {
                 </div>
               </div>
             </li>
+
+            {/* Các mục chữ thêm giống thanh menu Nhà Xinh */}
+            {NAV_EXTRA_ITEMS.map((item) => (
+              <li key={item.label}>
+                <Link
+                  to={item.to}
+                  className="text-[15px] font-medium text-gray-800 hover:text-amber-700 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
 
-          {/* Phải: giữ nguyên */}
+          {/* Phải: Go Shipper + Become a Vendor */}
           <div className="hidden lg:flex items-center gap-6">
             <Link to="/shipper/register" className="nav-link">
               <MdDeliveryDining />
@@ -206,7 +227,23 @@ const Navigation = () => {
                 ))}
               </details>
 
-              <div className="flex justify-between px-4 py-3 text-sm">
+              {/* Các mục chữ thêm ở mobile */}
+              <div className="border-t px-4 py-3 space-y-1 text-sm">
+                {NAV_EXTRA_ITEMS.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      navigate(item.to);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left py-1 hover:text-amber-700"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex justify-between px-4 py-3 text-sm border-t">
                 <Link to="/shipper/register">Go Shipper</Link>
                 <Link to="/register-vendor">Become a Vendor</Link>
               </div>

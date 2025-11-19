@@ -28,15 +28,15 @@ const HomeBannerV2 = () => {
             className="homeSliderV2"
         >
             <SwiperSlide>
-                <div className='item w-full rounded-md overflow-hidden'>
-                    <img src="https://demos.codezeel.com/prestashop/PRS21/PRS210502/modules/cz_imageslider/views/img/sample-1.jpg" />
+                <div className='item relative w-full h-[260px] sm:h-[320px] lg:h-[450px] rounded-md overflow-hidden'>
+                    <img src="https://nhaxinh.com/wp-content/uploads/2025/09/sofa-home-pages.jpg" className="w-full h-full object-cover" />
                     <div className='info absolute top-0 -right-[100%] opacity-0 w-[50%] h-[100%] z-50 p-8 flex items-center
-                     flex-col justify-center transition-all duration-700'>
+                     flex-col justify-center transition-all duration-700  mt-[-50px]'>
                         <h4 className='text-[18px] font-[500] text-left w-full mb-3 relative -right-[100%] opacity-0'>
                             Big Saving Days Sale
                         </h4>
                         <h2 className='text-[35px] font-[700] w-full relative -right-[100%] opacity-0'>
-                            Women Solid Round Green T-Shir
+                            Sofa Taura 2 Chỗ 2m (Vải Army Eponji)
 
                         </h2>
                         <h3 className='flex items-center gap-3 text-[18px] font-[500] text-left w-full mt-3 mb-3 relative -right-[100%] opacity-0'>
@@ -52,15 +52,15 @@ const HomeBannerV2 = () => {
             </SwiperSlide>
 
             <SwiperSlide>
-                <div className='item w-full rounded-md overflow-hidden'>
-                    <img src="https://demos.codezeel.com/prestashop/PRS21/PRS210502/modules/cz_imageslider/views/img/sample-2.jpg" />
+                <div className='item relative w-full h-[260px] sm:h-[320px] lg:h-[450px] rounded-md overflow-hidden'>
+                    <img src="https://nhaxinh.com/wp-content/uploads/2025/09/Ban-an.jpg" className="w-full h-full object-cover " />
                     <div className='info absolute top-0 -right-[100%] opacity-0 w-[50%] h-[100%] z-50 p-8 flex items-center
-                     flex-col justify-center transition-all duration-700'>
+                     flex-col justify-center transition-all duration-700  mt-[-50px]'>
                         <h4 className='text-[18px] font-[500] text-left w-full mb-3 relative -right-[100%] opacity-0'>
                             Big Saving Days Sale
                         </h4>
                         <h2 className='text-[35px] font-[700] w-full relative -right-[100%] opacity-0'>
-                            Women Solid Round Green T-Shir
+                            Bàn ăn Taura 8 chỗ E0202 Eponji 2m
 
                         </h2>
                         <h3 className='flex items-center gap-3 text-[18px] font-[500] text-left w-full mt-3 mb-3 relative -right-[100%] opacity-0'>

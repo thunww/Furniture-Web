@@ -95,7 +95,7 @@ const Header = () => {
 
   return (
     <header className="relative">
-      <div className="top-strip py-1 border-t-[2px] border-blue-500 bg-blue-600 border-b-[2px]">
+      <div className="top-strip py-1 border-t-[2px]border-stone-400 bg-stone-500  border-b-[2px]">
         <div className="container px-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="col1 w-full sm:w-1/2 overflow-hidden">

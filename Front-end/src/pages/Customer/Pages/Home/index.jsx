@@ -122,13 +122,17 @@ const Home = () => {
               <div className="w-1/2 md:w-full">
                 <BannerBoxV2
                   info="left"
-                  image="https://demos.codezeel.com/prestashop/PRS21/PRS210502/img/cms/sub-banner-1.jpg"
+                  image="https://nhaxinh.com/wp-content/uploads/2021/10/ban-lam-viec-biblio-1000x666-1-600x400.jpg"
+                  title="Bàn làm việc Biblio"
+                  price="$199.00"
                 />
               </div>
               <div className="w-1/2 md:w-full">
                 <BannerBoxV2
                   info="right"
                   image="https://demos.codezeel.com/prestashop/PRS21/PRS210502/img/cms/sub-banner-2.jpg"
+                  title="Ghế bar Monaco"
+                  price="$129.00"
                 />
               </div>
             </div>
@@ -137,7 +141,7 @@ const Home = () => {
       </section>
 
       {/* Dãy icon danh mục */}
-      <HomeCatSlider />
+      {/* <HomeCatSlider /> */}
 
       {/* Tabs danh mục nội thất */}
       <section className="py-4 sm:py-5 pt-0">
@@ -181,7 +185,7 @@ const Home = () => {
       </section>
 
       {/* Promo + slider quảng cáo */}
-      <section className="py-4 sm:py-5 pt-0">
+      {/* <section className="py-4 sm:py-5 pt-0">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="freeShipping w-full py-3 sm:py-4 px-3 sm:px-4 border-2 border-amber-700 flex flex-col sm:flex-row items-center gap-3 sm:gap-0 sm:justify-between rounded-md mb-2">
             <div className="col1 flex items-center gap-2 sm:gap-4">
@@ -197,11 +201,11 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-6">
+          {/* <div className="mt-4 sm:mt-6">
             <AdsbannerSliderV2 items={4} />
-          </div>
-        </div>
-      </section>
+          </div> */}
+      {/* </div>
+      </section> */}
 
       {/* Lưới sản phẩm */}
       <section className="py-4 sm:py-5 pt-0">

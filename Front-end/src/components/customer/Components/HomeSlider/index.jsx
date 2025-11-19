@@ -20,61 +20,61 @@ const HomeSlider = () => {
           className="sliderHome"
         >
           <SwiperSlide>
-            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden">
+            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://nhaxinh.com/wp-content/uploads/2025/09/banner.jpg"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden">
+            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zg8u93ojlk86_xxhdpi"
+                src="https://nhaxinh.com/wp-content/uploads/2025/05/lifestyle-decor.webp"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden">
+            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6z9ddjohsu056_xxhdpi"
+                src="https://nhaxinh.com/wp-content/uploads/2025/06/SOFA-MAY.webp"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[20px] overflow-hidden">
+            <div className="item rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://nhaxinh.com/wp-content/uploads/2025/08/mb-nha-xinh-luong-yen-1400x755.webp"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[20px] overflow-hidden">
+            <div className="item rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://nhaxinh.com/wp-content/uploads/2025/09/den-5-nha-xinh-1536x1034.jpg"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[20px] overflow-hidden">
+            <div className="item rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://nhaxinh.com/wp-content/uploads/2025/08/banner-1536x1055.jpg"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
