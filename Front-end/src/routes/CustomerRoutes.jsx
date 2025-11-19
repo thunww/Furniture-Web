@@ -7,14 +7,12 @@ import Home from "../pages/Customer/Pages/Home";
 
 import ProductListing from "../pages/Customer/Pages/ProductListing";
 
-
 import Login from "../pages/Auth/Login";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Register from "../pages/Auth/Register";
 import ProductDetails from "../pages/Customer/Pages/ProductDetails";
 import MyAccount from "../pages/Customer/Pages/MyAccount";
-
 
 import Dashboard from "../pages/Customer/Pages/MyAccount/Dashboard";
 import Profile from "../pages/Customer/Pages/MyAccount/Profile";
@@ -70,16 +68,13 @@ const CustomerRoutes = () => {
     <>
       <MyContext.Provider value={values}>
         <Routes>
-
           <Route element={<PrivateRoute allowedRoles={["customer"]} />}>
             <Route path="/register-vendor" element={<VendorRegistration />} />
           </Route>
           {/* Bọc tất cả route con trong CustomerLayout */}
 
-
           {/* <Route path="/register-vendor" element={<VendorRegistration />} />
           Bọc tất cả route con trong CustomerLayout */}
-
 
           <Route path="/" element={<CustomerLayout />}>
             <Route index element={<Home />} />
@@ -90,7 +85,7 @@ const CustomerRoutes = () => {
             <Route
               path="forgot-password"
               exact={true}
-              element={<ForgotPassword />}  
+              element={<ForgotPassword />}
             />
             <Route
               path="reset-password"
@@ -108,7 +103,7 @@ const CustomerRoutes = () => {
               <Route path="/payment" element={<Payment />} />
               <Route path="/my-account" element={<MyAccount />}>
                 <Route index element={<Dashboard />} />
-                <Route path="profile/:user_id" element={<Profile />} />
+                <Route path="profile" element={<Profile />} />
                 <Route path="orders" element={<OrdersList />} />
                 <Route path="addresses" element={<AddressList />} />
               </Route>

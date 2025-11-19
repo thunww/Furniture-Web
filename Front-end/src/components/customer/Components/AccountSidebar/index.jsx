@@ -88,7 +88,7 @@ const AccountSidebar = ({ user }) => {
           <li className="mb-1 sm:mb-2">
             {user && (
               <Link
-                to={`/my-account/profile/${user.user_id}`}
+                to={`/my-account/profile/`}
                 className="flex items-center gap-2 p-2 rounded-md text-gray-700 hover:bg-gray-50 transition text-sm sm:text-base"
               >
                 <FaRegUser className="text-lg flex-shrink-0" />

@@ -1,63 +1,54 @@
 import adminApi from "../api/adminApi";
 
 const adminService = {
+  /* ================= ADMIN ================= */
+
   getAllUsers: async () => {
-    try {
-      const response = await adminApi.getAllUsers();
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const res = await adminApi.getAllUsers();
+    return res.data;
   },
+
   getUserById: async (userId) => {
-    try {
-      const response = await adminApi.getUserById(userId);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const res = await adminApi.getUserById(userId);
+    return res.data;
   },
+
   updateUserById: async (userId, userData) => {
-    try {
-      const response = await adminApi.updateUser(userId, userData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const res = await adminApi.updateUser(userId, userData);
+    return res.data;
   },
+
   banUser: async (userId) => {
-    try {
-      const response = await adminApi.banUser(userId);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const res = await adminApi.banUser(userId);
+    return res.data;
   },
+
   unbanUser: async (userId) => {
-    try {
-      const response = await adminApi.unbanUser(userId);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const res = await adminApi.unbanUser(userId);
+    return res.data;
   },
+
   assignRoleToUser: async (userId, roleId) => {
-    try {
-      const response = await adminApi.assignRoleToUser(userId, roleId);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const res = await adminApi.assignRoleToUser(userId, roleId);
+    return res.data;
   },
+
+  /* ================= CUSTOMER ================= */
+
+  getMyProfile: async () => {
+    const res = await adminApi.getMyProfile();
+    return res.data; // { user: {...} }
+  },
+
+  updateMyProfile: async (data) => {
+    const res = await adminApi.updateMyProfile(data);
+    return res.data; // { success: true, data: {...} }
+  },
+
   uploadAvatar: async (formData) => {
-    try {
-      const response = await adminApi.uploadAvatar(formData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const res = await adminApi.uploadAvatar(formData);
+    return res.data;
   },
 };
-
 
 export default adminService;

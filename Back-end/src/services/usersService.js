@@ -1,4 +1,4 @@
-const { User, Role } = require("../models");
+const { User, Role, UserRole } = require("../models");
 
 const getAllUsers = async () => {
   try {
@@ -16,13 +16,12 @@ const getAllUsers = async () => {
           model: Role,
           as: "roles",
           attributes: ["role_name"],
-          through: { attributes: [] }, // Loại bỏ thông tin từ bảng trung gian UserRole
+          through: { attributes: [] },
         },
       ],
       order: [["createdAt", "DESC"]],
     });
 
-    // Chuyển đổi dữ liệu để trả về đúng format mong muốn
     const usersWithRoles = users.map((user) => ({
       ...user.get({ plain: true }),
       roles: user.roles.map((role) => role.role_name),
@@ -112,13 +111,12 @@ const banUser = async (userId) => {
   }
 
   user.status = "banned";
-
   await user.save();
 
   return {
     success: true,
     message: "Banned user successfully!",
-    user: { id: user.id, status: user.status },
+    user: { id: user.user_id, status: user.status },
   };
 };
 
@@ -126,22 +124,20 @@ const unbanUser = async (userId) => {
   const user = await User.findByPk(userId, {
     attributes: { exclude: ["password"] },
   });
-  if (!user) {
-    throw new Error("User not found");
-  }
+
+  if (!user) throw new Error("User not found");
 
   if (user.status !== "banned") {
     return { success: false, message: "User is not banned" };
   }
 
-  user.status = "active"; // Hoặc trạng thái ban đầu của user, tùy vào hệ thống của bạn
-
+  user.status = "active";
   await user.save();
 
   return {
     success: true,
     message: "User has been unbanned successfully!",
-    user: { id: user.id, status: user.status },
+    user: { id: user.user_id, status: user.status },
   };
 };
 
@@ -180,19 +176,15 @@ const updateUser = async (userId, updatedData) => {
     return { success: false, message: "Internal Server Error", user: null };
   }
 };
-// hàm lấy thông tin shop của user
 
 const uploadAvatar = async (user_id, imageUrl) => {
   try {
     const user = await User.findByPk(user_id, {
       attributes: { exclude: ["password"] },
     });
-    if (!user) {
-      throw new Error("User not found");
-    }
+    if (!user) throw new Error("User not found");
 
     user.profile_picture = imageUrl;
-
     await user.save();
 
     return {
@@ -206,6 +198,26 @@ const uploadAvatar = async (user_id, imageUrl) => {
   }
 };
 
+const getUserProfile = async (userId) => {
+  const user = await User.findOne({
+    where: { user_id: userId },
+    attributes: ["user_id", "username", "email", "status", "is_verified"],
+  });
+
+  if (!user) throw new Error("User not found");
+
+  const userRoles = await UserRole.findAll({ where: { user_id: userId } });
+  const roleIds = userRoles.map((ur) => ur.role_id);
+
+  const roles = await Role.findAll({ where: { role_id: roleIds } });
+  const roleNames = roles.map((r) => r.role_name);
+
+  return {
+    ...user.dataValues,
+    roles: roleNames,
+  };
+};
+
 module.exports = {
   getAllUsers,
   assignRoleToUser,
@@ -215,4 +227,5 @@ module.exports = {
   unbanUser,
   updateUser,
   uploadAvatar,
+  getUserProfile,
 };

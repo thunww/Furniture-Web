@@ -7,15 +7,23 @@ const {
   unbanUser,
   updateUser,
   uploadAvatar,
+  getUserProfile,
 } = require("../services/usersService");
 
 const handleGetAllUsers = async (req, res) => {
   try {
-    const users = await getAllUsers();
-    res.status(200).json({ success: true, users });
+    const { users } = await getAllUsers();
+
+    return res.status(200).json({
+      success: true,
+      users,
+    });
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 
@@ -42,9 +50,21 @@ const handleRemoveRoleFromUser = async (req, res) => {
 
 const handleGetUserById = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const result = await getUserById(userId);
-    res.status(200).json(result);
+    const roles = req.user.roles;
+    const loggedInUserId = req.user.user_id;
+    const requestedId = req.params.userId
+      ? parseInt(req.params.userId)
+      : loggedInUserId;
+
+    if (roles.includes("customer") && requestedId !== loggedInUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden — Cannot view other users",
+      });
+    }
+
+    const result = await getUserById(requestedId);
+    return res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
@@ -91,43 +111,43 @@ const handleUnbanUser = async (req, res) => {
 };
 
 const handleUpdateUser = async (req, res) => {
-  const { userId } = req.params;
-  const updatedData = req.body;
+  const loggedInUserId = req.user.user_id;
 
   try {
-    const result = await updateUser(userId, updatedData);
-
-    if (result.success) {
-      return res.status(200).json(result);
-    } else {
-      return res.status(400).json(result);
-    }
+    const result = await updateUser(loggedInUserId, req.body);
+    return res.status(200).json(result);
   } catch (error) {
-    console.error("Error in updateUserController:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
 const handleUploadAvatar = async (req, res) => {
   try {
-    if (!req.file) {
+    if (!req.file)
       return res.status(400).json({ message: "Please select an image" });
-    }
+
+    const userId = req.user.user_id; // ⭐ KHÔNG BAO GIỜ LẤY body.user_id
     const imageUrl = req.file.path;
 
-    const result = await uploadAvatar(req.body.user_id, imageUrl);
-
-    if (result.success) {
-      return res.status(200).json(result);
-    } else {
-      return res.status(400).json(result);
-    }
+    const result = await uploadAvatar(userId, imageUrl);
+    return res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// ========================== GET PROFILE ==========================
+const handleGetProfile = async (req, res) => {
+  try {
+    // ⭐ Chỉ dùng user_id lấy từ authMiddleware
+    const profile = await getUserProfile(req.user.user_id);
+
+    return res.status(200).json({
+      message: "Profile retrieved successfully",
+      user: profile,
+    });
+  } catch (error) {
+    return res.status(401).json({ message: error.message });
   }
 };
 
@@ -140,4 +160,5 @@ module.exports = {
   handleUnbanUser,
   handleUpdateUser,
   handleUploadAvatar,
+  handleGetProfile,
 };

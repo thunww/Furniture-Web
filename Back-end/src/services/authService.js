@@ -480,27 +480,21 @@ const logoutUser = async (userId) => {
   return { message: "Logout successful" };
 };
 
-const getUserProfile = async (accessToken) => {
-  const decoded = verifyToken(accessToken);
+const getUserProfile = async (userId) => {
   const user = await User.findOne({
-    where: { user_id: decoded.user_id },
+    where: { user_id: userId },
     attributes: ["user_id", "username", "email", "status", "is_verified"],
   });
+
   if (!user) throw new Error("User not found");
 
-  const userRoles = await UserRole.findAll({
-    where: { user_id: user.user_id },
-  });
+  const userRoles = await UserRole.findAll({ where: { user_id: userId } });
   const roleIds = userRoles.map((ur) => ur.role_id);
   const roles = await Role.findAll({ where: { role_id: roleIds } });
   const roleNames = roles.map((r) => r.role_name);
 
   return {
-    user_id: user.user_id,
-    username: user.username,
-    email: user.email,
-    status: user.status,
-    is_verified: user.is_verified,
+    ...user.dataValues,
     roles: roleNames,
   };
 };

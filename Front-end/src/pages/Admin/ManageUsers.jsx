@@ -3,10 +3,10 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAllUsers,
   banUser,
-  updateUserStatus,
   unbanUser,
   assignRoleToUser,
 } from "../../redux/adminSlice";
+
 import Table from "../../components/common/Table";
 import {
   FaSearch,
@@ -17,10 +17,8 @@ import {
   FaCheckCircle,
   FaUserClock,
 } from "react-icons/fa";
-import { Unlock } from "lucide-react";
 
 import Swal from "sweetalert2";
-
 import { useNavigate } from "react-router-dom";
 
 const ManageUsers = () => {
@@ -33,17 +31,18 @@ const ManageUsers = () => {
     dispatch(fetchAllUsers());
   }, [dispatch]);
 
-  // Filter users based on search
+  // Filter
   const filteredUsers =
     users?.filter((user) => {
       const searchTerm = search.toLowerCase();
       return (
         user.username?.toLowerCase().includes(searchTerm) ||
         user.email?.toLowerCase().includes(searchTerm) ||
-        user.user_id?.toString().includes(searchTerm) // ✅ Thêm tìm theo user_id
+        user.user_id?.toString().includes(searchTerm)
       );
     }) ?? [];
 
+  /* ---------------- BAN USER ---------------- */
   const handleBan = (user_id) => {
     Swal.fire({
       title: "Confirm Action",
@@ -53,31 +52,21 @@ const ManageUsers = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, ban the user!",
-      cancelButtonText: "Cancel",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const response = await dispatch(banUser(user_id));
+        const res = await dispatch(banUser(user_id));
 
-        if (banUser.fulfilled.match(response)) {
-          Swal.fire({
-            title: "Success!",
-            text: "The user has been banned from the system.",
-            icon: "success",
-            confirmButtonColor: "#3085d6",
-          });
-          dispatch(updateUserStatus({ userId: user_id, status: "banned" }));
+        if (banUser.fulfilled.match(res)) {
+          Swal.fire("Success!", "User has been banned.", "success");
+          dispatch(fetchAllUsers()); // refresh list
         } else {
-          Swal.fire({
-            title: "Error!",
-            text: response.payload || "Failed to ban the user.",
-            icon: "error",
-            confirmButtonColor: "#d33",
-          });
+          Swal.fire("Error", res.payload || "Ban failed.", "error");
         }
       }
     });
   };
 
+  /* ---------------- UNBAN USER ---------------- */
   const handleUnban = (user_id) => {
     Swal.fire({
       title: "Unban User",
@@ -86,297 +75,223 @@ const ManageUsers = () => {
       showCancelButton: true,
       confirmButtonColor: "#28a745",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, unban the user!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, unban!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const response = await dispatch(unbanUser(user_id));
+        const res = await dispatch(unbanUser(user_id));
 
-        if (unbanUser.fulfilled.match(response)) {
-          Swal.fire({
-            title: "Success!",
-            text: "The user has been unbanned successfully.",
-            icon: "success",
-            confirmButtonColor: "#3085d6",
-          });
-          dispatch(updateUserStatus({ userId: user_id, status: "active" }));
+        if (unbanUser.fulfilled.match(res)) {
+          Swal.fire("Success!", "User has been unbanned.", "success");
+          dispatch(fetchAllUsers());
         } else {
-          Swal.fire({
-            title: "Error!",
-            text: response.payload || "Failed to unban the user.",
-            icon: "error",
-            confirmButtonColor: "#d33",
-          });
+          Swal.fire("Error", res.payload || "Unban failed.", "error");
         }
       }
     });
   };
 
-  // Hàm xem thông tin người dùng
-  const handleView = (user_id) => {
-    navigate(`/admin/view-user/${user_id}`);
-  };
-
+  /* ---------------- ASSIGN ROLE (ADMIN/VENDOR/SHIPPER...) ---------------- */
   const handleGrantPermission = (user_id) => {
     Swal.fire({
       title: "User permissions",
       html: `
         <div class="mb-3">
-          <p class="text-gray-700 mb-2">Select the permissions you want to grant to the user:</p>
+          <p class="text-gray-700 mb-2">Select a role:</p>
           <div class="flex flex-col gap-2">
             <label class="inline-flex items-center">
-              <input type="radio" name="role" value="customer" class="form-radio h-5 w-5 text-blue-600" checked>
-              <span class="ml-2 text-gray-700">Customer</span>
+              <input type="radio" name="role" value="customer" checked>
+              <span class="ml-2">Customer</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="radio" name="role" value="admin" class="form-radio h-5 w-5 text-green-600">
-              <span class="ml-2 text-gray-700">Admin</span>
+              <input type="radio" name="role" value="admin">
+              <span class="ml-2">Admin</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="radio" name="role" value="vendor" class="form-radio h-5 w-5 text-purple-600">
-              <span class="ml-2 text-gray-700">Vendor</span>
+              <input type="radio" name="role" value="vendor">
+              <span class="ml-2">Vendor</span>
             </label>
             <label class="inline-flex items-center">
-              <input type="radio" name="role" value="shipper" class="form-radio h-5 w-5 text-orange-600">
-              <span class="ml-2 text-gray-700">Shipper</span>
+              <input type="radio" name="role" value="shipper">
+              <span class="ml-2">Shipper</span>
             </label>
           </div>
         </div>
       `,
-      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Confirm permission",
-      cancelButtonText: "Cancel",
-      background: "#fff",
-      borderRadius: "10px",
-      focusConfirm: false,
-      preConfirm: () => {
+      confirmButtonText: "Confirm",
+    }).then((result) => {
+      if (result.isConfirmed) {
         const selectedRole = document.querySelector(
           'input[name="role"]:checked'
         ).value;
-        return { role: selectedRole };
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
+
         const roleMapping = {
           admin: 1,
           customer: 2,
           shipper: 3,
           vendor: 4,
         };
-        const selectedRole = result.value.role;
-        const roleId = roleMapping[selectedRole];
-        // Gọi API Redux để gán role
-        dispatch(assignRoleToUser({ userId: user_id, roleId: roleId }))
+
+        dispatch(
+          assignRoleToUser({
+            userId: user_id,
+            roleId: roleMapping[selectedRole],
+          })
+        )
           .unwrap()
           .then(() => {
-            Swal.fire({
-              icon: "success",
-              title: "Authorization successful!",
-              text: `User has been granted permission ${selectedRole.toUpperCase()}.`,
-              confirmButtonColor: "#3085d6",
-              timer: 2000,
-              timerProgressBar: true,
-            });
+            Swal.fire("Success!", "Role updated.", "success");
+            dispatch(fetchAllUsers());
           })
-          .catch((error) => {
-            Swal.fire({
-              icon: "error",
-              title: "Failed!",
-              text: error || "Failed to grant user permission.",
-              confirmButtonColor: "#d33",
-            });
-          });
+          .catch(() => Swal.fire("Error!", "Failed to assign role", "error"));
       }
     });
   };
-  // Table columns configuration
+
+  /* ---------------- TABLE COLUMNS ---------------- */
   const columns = [
     { header: "ID", field: "user_id" },
+
     {
       header: "Avatar",
       field: "profile_picture",
-      render: (profile_picture) => (
-        <div className="flex justify-center">
-          <img
-            src={
-              profile_picture ||
-              "https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"
-            }
-            alt="Avatar"
-            className="w-12 h-12 rounded-full object-cover border-2 border-blue-500 shadow-md"
-          />
-        </div>
+      render: (img) => (
+        <img
+          src={
+            img ||
+            "https://i.pinimg.com/736x/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"
+          }
+          className="w-12 h-12 rounded-full object-cover border-2 border-blue-500"
+        />
       ),
     },
+
     { header: "User name", field: "username" },
     { header: "Email", field: "email" },
+
     {
       header: "Role",
       field: "roles",
       render: (roles) => (
-        <div className="flex gap-1 flex-wrap">
-          {roles.map((role, index) => (
-            <span
-              key={index}
-              className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full"
-            >
-              {role}
+        <div className="flex flex-wrap gap-1">
+          {roles.map((r) => (
+            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+              {r}
             </span>
           ))}
         </div>
       ),
     },
+
     {
       header: "Status",
       field: "status",
-      render: (status) => (
+      render: (s) => (
         <span
           className={`px-3 py-1 rounded-full text-xs font-medium ${
-            status === "active"
-              ? "bg-green-100 text-green-800"
-              : status === "in_active"
-              ? "bg-gray-100 text-gray-800"
-              : status === "banned"
-              ? "bg-red-300 text-red-500"
-              : "bg-yellow-100 text-yellow-800"
+            s === "active"
+              ? "bg-green-100 text-green-700"
+              : s === "banned"
+              ? "bg-red-200 text-red-600"
+              : "bg-gray-100 text-gray-700"
           }`}
         >
-          {status}
+          {s}
         </span>
       ),
-    },
-    {
-      header: "Verify",
-      field: "is_verified",
-      render: (is_verified) =>
-        is_verified ? (
-          <div className="flex items-center justify-center">
-            <span className="flex items-center bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">
-              <FaUserCheck className="mr-1" />
-              Verified
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center">
-            <span className="flex items-center bg-red-100 text-red-800 text-xs font-medium px-3 py-1 rounded-full">
-              <FaUserSlash className="mr-1" />
-              Not Verified
-            </span>
-          </div>
-        ),
     },
 
     {
       header: "Actions",
-      field: "actions",
-      render: (_, user) => {
-        return (
-          <div className="flex items-center justify-center space-x-2">
-            {/* Xem thông tin user */}
-            <button
-              onClick={() => navigate(`/admin/view-user/${user?.user_id}`)}
-              className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg shadow-md transition duration-200 hover:scale-105"
-              title="View User"
-            >
-              <FaEye />
-            </button>
+      render: (_, user) => (
+        <div className="flex space-x-2 justify-center">
+          <button
+            className="bg-blue-500 text-white p-2 rounded-lg"
+            onClick={() => navigate(`/admin/view-user/${user.user_id}`)}
+          >
+            <FaEye />
+          </button>
 
-            {/* Cấp quyền user */}
-            <button
-              onClick={() => handleGrantPermission(user?.user_id)}
-              className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-lg shadow-md transition duration-200 hover:scale-105"
-              title="Grant Permission"
-            >
-              <FaUserCheck />
-            </button>
+          <button
+            className="bg-green-500 text-white p-2 rounded-lg"
+            onClick={() => handleGrantPermission(user.user_id)}
+          >
+            <FaUserCheck />
+          </button>
 
-            {/* Cấm user */}
-            {user?.status === "banned" ? (
-              <button
-                onClick={() => handleUnban(user?.user_id)}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white p-2 rounded-lg shadow-md transition duration-200 hover:scale-105"
-                title="Unban User"
-              >
-                <FaCheckCircle />
-              </button>
-            ) : (
-              <button
-                onClick={() => handleBan(user?.user_id)}
-                className="bg-red-500 hover:bg-yellow-600 text-white p-2 rounded-lg shadow-md transition duration-200 hover:scale-105"
-                title="Ban User"
-              >
-                <FaUserSlash />
-              </button>
-            )}
-          </div>
-        );
-      },
+          {user.status === "banned" ? (
+            <button
+              className="bg-yellow-500 text-white p-2 rounded-lg"
+              onClick={() => handleUnban(user.user_id)}
+            >
+              <FaCheckCircle />
+            </button>
+          ) : (
+            <button
+              className="bg-red-500 text-white p-2 rounded-lg"
+              onClick={() => handleBan(user.user_id)}
+            >
+              <FaUserSlash />
+            </button>
+          )}
+        </div>
+      ),
     },
   ];
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-full mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
+      <div className="bg-white shadow-xl rounded-xl overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4">
           <h2 className="text-2xl font-bold text-white">Users Management</h2>
-          <p className="text-blue-100 mt-1">
-            Manage all system users from this dashboard
-          </p>
+          <p className="text-blue-100">Manage all system users</p>
         </div>
 
         <div className="p-6">
-          {/* Search bar */}
-          <div className="flex items-center bg-gray-100 p-4 rounded-xl mb-6 shadow-sm border border-gray-200">
+          {/* Search */}
+          <div className="flex items-center bg-gray-100 p-4 rounded-xl mb-6 shadow-sm">
             <FaSearch className="text-gray-500 mr-3" />
             <input
               type="text"
-              placeholder="Search by name or email..."
+              placeholder="Search by name, email, or ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-gray-800 font-medium"
+              className="flex-1 bg-transparent outline-none"
             />
           </div>
 
-          {/* Stats cards */}
+          {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-blue-50 p-4 rounded-xl shadow-sm border border-blue-100">
-              <div className="flex items-center mb-2">
-                <FaUsers className="text-blue-500 text-xl mr-2" />
-                <p className="text-blue-500 font-medium">Total Users</p>
-              </div>
+            <div className="bg-blue-50 p-4 rounded-xl">
+              <FaUsers className="text-blue-500 text-xl mb-1" />
               <p className="text-2xl font-bold">{users.length}</p>
+              <p className="text-blue-500">Total Users</p>
             </div>
-            <div className="bg-green-50 p-4 rounded-xl shadow-sm border border-green-100">
-              <div className="flex items-center mb-2">
-                <FaUserCheck className="text-green-500 text-xl mr-2" />
-                <p className="text-green-500 font-medium">Verified Users</p>
-              </div>
+
+            <div className="bg-green-50 p-4 rounded-xl">
+              <FaUserCheck className="text-green-500 text-xl mb-1" />
               <p className="text-2xl font-bold">
-                {users.filter((user) => user.is_verified).length}
+                {users.filter((u) => u.is_verified).length}
               </p>
+              <p className="text-green-600">Verified</p>
             </div>
-            <div className="bg-purple-50 p-4 rounded-xl shadow-sm border border-purple-100">
-              <div className="flex items-center mb-2">
-                <FaUserClock className="text-purple-500 text-xl mr-2" />
-                <p className="text-purple-500 font-medium">Active Users</p>
-              </div>
+
+            <div className="bg-purple-50 p-4 rounded-xl">
+              <FaUserClock className="text-purple-500 text-xl mb-1" />
               <p className="text-2xl font-bold">
-                {users.filter((user) => user.status === "active").length}
+                {users.filter((u) => u.status === "active").length}
               </p>
+              <p className="text-purple-600">Active</p>
             </div>
           </div>
-          {/* Users Table */}
+
+          {/* Table */}
           {loading ? (
-            <div className="flex items-center justify-center p-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div className="flex justify-center p-10">
+              <div className="animate-spin h-10 w-10 border-b-2 border-blue-500 rounded-full" />
             </div>
           ) : (
-            <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
-              <Table columns={columns} data={filteredUsers} pageSize={10} />
-            </div>
+            <Table columns={columns} data={filteredUsers} pageSize={10} />
           )}
         </div>
       </div>

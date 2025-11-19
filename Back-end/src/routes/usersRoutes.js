@@ -12,6 +12,7 @@ const {
   handleUnbanUser,
   handleUpdateUser,
   handleUploadAvatar,
+  handleGetProfile,
 } = require("../controllers/usersController");
 
 const router = express.Router();
@@ -23,49 +24,40 @@ router.get(
   handleGetAllUsers
 );
 
-router.post(
-  "/admin/users/assign-role",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  handleAssignRoleToUser
-);
-
-router.post(
-  "/admin/users/remove-role",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  handleRemoveRoleFromUser
-);
-
 router.get(
-  "/users/:userId",
+  "/admin/users/:userId",
   authMiddleware,
-  roleMiddleware(["admin", "customer"]),
+  roleMiddleware(["admin"]),
   handleGetUserById
 );
 
 router.put(
-  "/admin/users/ban/",
+  "/admin/users/:userId",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  handleUpdateUser
+);
+
+router.put(
+  "/admin/users/ban",
   authMiddleware,
   roleMiddleware(["admin"]),
   handleBanUser
 );
 
 router.put(
-  "/admin/users/unban/",
+  "/admin/users/unban",
   authMiddleware,
   roleMiddleware(["admin"]),
   handleUnbanUser
 );
 
-router.put(
-  "/users/:userId",
-  authMiddleware,
-  roleMiddleware(["customer"]),
-  handleUpdateUser
-);
+router.get("/users/me", authMiddleware, handleGetProfile);
+
+router.put("/users/me", authMiddleware, handleUpdateUser);
+
 router.post(
-  "/users/upload-avatar",
+  "/users/me/upload-avatar",
   authMiddleware,
   upload.single("image"),
   handleUploadAvatar

@@ -7,7 +7,6 @@ const {
   logoutUser,
   forgotPassword,
   resetPassword,
-  getUserProfile,
 } = require("../services/authService");
 const { verifyToken } = require("../config/jwt");
 require("dotenv").config();
@@ -17,8 +16,8 @@ const isProd = process.env.NODE_ENV === "production";
 const cookieOptions = {
   httpOnly: true,
   secure: isProd ? true : false,
-  sameSite: "None", // DEV và PROD đều phải None
-  domain: isProd ? process.env.COOKIE_DOMAIN : "localhost",
+  sameSite: isProd ? "None" : "Lax",
+  domain: isProd ? process.env.COOKIE_DOMAIN : undefined,
   path: "/",
 };
 
@@ -323,28 +322,6 @@ const handleLogout = async (req, res) => {
   }
 };
 
-// ========================== GET PROFILE ==========================
-const handleGetProfile = async (req, res) => {
-  try {
-    const accessToken = req.cookies?.accessToken;
-    if (!accessToken) {
-      return res.status(401).json({ message: "Unauthorized - No token" });
-    }
-
-    const profile = await getUserProfile(accessToken);
-
-    return res.status(200).json({
-      message: "Profile retrieved successfully",
-      user: profile,
-    });
-  } catch (error) {
-    console.error("Get profile error:", error.message);
-    return res.status(401).json({
-      message: error.message || "Failed to get profile",
-    });
-  }
-};
-
 module.exports = {
   handleregisterUser,
   handleLoginUser,
@@ -354,5 +331,4 @@ module.exports = {
   handleForgotPassword,
   handleResetPassword,
   handleLogout,
-  handleGetProfile,
 };
