@@ -89,7 +89,11 @@ const ProfileField = ({ icon, label, value, isEditing, onChange, name }) => {
         </>
       ) : (
         <p className="text-base font-medium text-gray-800 py-2 px-3 bg-gray-50 rounded-lg truncate">
-          {value || "Not updated yet"}
+          {name === "date_of_birth"
+            ? value
+              ? new Date(value).toLocaleDateString("vi-VN")
+              : "Not updated yet"
+            : value || "Not updated yet"}
         </p>
       )}
     </div>

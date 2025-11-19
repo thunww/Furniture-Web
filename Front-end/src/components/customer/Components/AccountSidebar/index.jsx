@@ -2,12 +2,10 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../../redux/authSlice";
-import { MdOutlineDashboard } from "react-icons/md";
 import { FaRegUser } from "react-icons/fa";
-import { MdOutlineShoppingCart } from "react-icons/md";
+import { MdOutlineShoppingCart, MdOutlineLogout } from "react-icons/md";
 import { IoLocationOutline } from "react-icons/io5";
 import { CiHeart } from "react-icons/ci";
-import { MdOutlineLogout } from "react-icons/md";
 import { fetchAllOrders } from "../../../../redux/orderSlice";
 import { fetchReviewsByUser } from "../../../../redux/reviewsSilce";
 
@@ -19,8 +17,10 @@ const AccountSidebar = ({ user }) => {
     dispatch(logout());
     navigate("/login");
   };
-  const { orders, loading, error } = useSelector((state) => state.orders);
+
+  const { orders } = useSelector((state) => state.orders);
   const { reviews: reviewList } = useSelector((state) => state.reviews);
+
   const reviewCount = reviewList?.length || 0;
 
   useEffect(() => {
@@ -34,16 +34,16 @@ const AccountSidebar = ({ user }) => {
     }, 0) || 0;
 
   return (
-    <div className="account-sidebar bg-white shadow-md rounded-md overflow-hidden">
-      {/* User Profile Section */}
-      <div className="user-profile p-4 sm:p-5 bg-gradient-to-r from-blue-500 to-blue-700 text-white">
+    <div className="account-sidebar bg-white shadow-md rounded-md overflow-hidden border border-[#5A5758]">
+      {/* ===== USER PROFILE ===== */}
+      <div className="user-profile p-5 bg-[#3B393A] text-white">
         <div className="flex flex-col items-center">
-          <div className="avatar mb-2 sm:mb-3 relative">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 overflow-hidden rounded-full border-4 border-white">
+          <div className="avatar mb-3 relative">
+            <div className="w-20 h-20 overflow-hidden rounded-full border-4 border-[#D6D3D1] shadow-md">
               <img
                 src={
                   user?.profile_picture ||
-                  "/https://th.bing.com/th/id/OIP.ByNwhzY5vUBvdIEfMCqDogHaHa?rs=1&pid=ImgDetMain"
+                  "https://th.bing.com/th/id/OIP.ByNwhzY5vUBvdIEfMCqDogHaHa?rs=1&pid=ImgDetMain"
                 }
                 alt="Avatar"
                 className="w-full h-full object-cover"
@@ -55,81 +55,96 @@ const AccountSidebar = ({ user }) => {
               />
             </div>
           </div>
-          <h3 className="text-base sm:text-lg font-semibold truncate max-w-full">
+
+          <h3 className="text-lg font-semibold truncate">
             {user
               ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
-              : "User"}
+              : "Người dùng"}
           </h3>
-          <p className="text-xs sm:text-sm text-blue-100 truncate max-w-full">
+
+          <p className="text-sm text-[#D6D3D1] truncate">
             {user?.email || "user@example.com"}
           </p>
         </div>
-        <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-blue-400">
+
+        <div className="mt-4 pt-4 border-t border-[#5A5758]">
           <div className="flex justify-between text-center text-xs">
-            <div className="px-1">
-              <p className="font-bold text-lg sm:text-xl">{orderCount}</p>
-              <p className="text-xs">Orders</p>
+            <div className="px-2">
+              <p className="font-bold text-xl">{orderCount}</p>
+              <p className="text-[#D6D3D1]">Đơn hàng</p>
             </div>
-            <div className="px-1">
-              <p className="font-bold text-lg sm:text-xl">0</p>
-              <p className="text-xs">Favorites</p>
+            <div className="px-2">
+              <p className="font-bold text-xl">0</p>
+              <p className="text-[#D6D3D1]">Yêu thích</p>
             </div>
-            <div className="px-1">
-              <p className="font-bold text-lg sm:text-xl">{reviewCount}</p>
-              <p className="text-xs">Reviews</p>
+            <div className="px-2">
+              <p className="font-bold text-xl">{reviewCount}</p>
+              <p className="text-[#D6D3D1]">Đánh giá</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Menu */}
-      <div className="p-3 sm:p-4">
+      {/* ===== MENU ===== */}
+      <div className="p-4">
         <ul className="sidebar-menu">
-          <li className="mb-1 sm:mb-2">
-            {user && (
-              <Link
-                to={`/my-account/profile/`}
-                className="flex items-center gap-2 p-2 rounded-md text-gray-700 hover:bg-gray-50 transition text-sm sm:text-base"
-              >
-                <FaRegUser className="text-lg flex-shrink-0" />
-                <span className="truncate">Personal Information</span>
-              </Link>
-            )}
+          {/* Thông tin cá nhân */}
+          <li className="mb-2">
+            <Link
+              to="/my-account/profile"
+              className="flex items-center gap-2 p-2 rounded-md 
+                         text-[#3B393A] hover:bg-gray-100 transition text-sm sm:text-base"
+            >
+              <FaRegUser className="text-lg" />
+              <span>Thông tin cá nhân</span>
+            </Link>
           </li>
-          <li className="mb-1 sm:mb-2">
+
+          {/* Đơn hàng */}
+          <li className="mb-2">
             <Link
               to="/my-account/orders"
-              className="flex items-center gap-2 p-2 rounded-md text-gray-700 hover:bg-gray-50 transition text-sm sm:text-base"
+              className="flex items-center gap-2 p-2 rounded-md 
+                         text-[#3B393A] hover:bg-gray-100 transition text-sm sm:text-base"
             >
-              <MdOutlineShoppingCart className="text-lg flex-shrink-0" />
-              <span className="truncate">My Orders</span>
+              <MdOutlineShoppingCart className="text-lg" />
+              <span>Đơn hàng của tôi</span>
             </Link>
           </li>
-          <li className="mb-1 sm:mb-2">
+
+          {/* Địa chỉ */}
+          <li className="mb-2">
             <Link
               to="/my-account/addresses"
-              className="flex items-center gap-2 p-2 rounded-md text-gray-700 hover:bg-gray-50 transition text-sm sm:text-base"
+              className="flex items-center gap-2 p-2 rounded-md 
+                         text-[#3B393A] hover:bg-gray-100 transition text-sm sm:text-base"
             >
-              <IoLocationOutline className="text-lg flex-shrink-0" />
-              <span className="truncate">Addresses</span>
+              <IoLocationOutline className="text-lg" />
+              <span>Địa chỉ</span>
             </Link>
           </li>
-          <li className="mb-1 sm:mb-2">
+
+          {/* Wishlist */}
+          <li className="mb-2">
             <Link
-              to="/my-account/wishlist"
-              className="flex items-center gap-2 p-2 rounded-md text-gray-700 hover:bg-gray-50 transition text-sm sm:text-base"
+              to="#"
+              className="flex items-center gap-2 p-2 rounded-md 
+                         text-[#3B393A] hover:bg-gray-100 transition text-sm sm:text-base"
             >
-              <CiHeart className="text-lg flex-shrink-0" />
-              <span className="truncate">Wishlist</span>
+              <CiHeart className="text-lg" />
+              <span>Danh sách yêu thích</span>
             </Link>
           </li>
-          <li className="mt-4 sm:mt-6 border-t pt-3 sm:pt-4">
+
+          {/* Logout */}
+          <li className="mt-6 border-t pt-4 border-[#5A5758]">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 p-2 rounded-md text-red-500 hover:bg-red-50 transition w-full text-sm sm:text-base"
+              className="flex items-center gap-2 p-2 rounded-md 
+                         text-red-600 hover:bg-red-50 transition w-full text-sm sm:text-base"
             >
-              <MdOutlineLogout className="text-lg flex-shrink-0" />
-              <span className="truncate">Logout</span>
+              <MdOutlineLogout className="text-lg" />
+              <span>Đăng xuất</span>
             </button>
           </li>
         </ul>

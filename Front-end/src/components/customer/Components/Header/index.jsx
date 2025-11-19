@@ -69,28 +69,29 @@ const Header = () => {
 
   return (
     <header className="relative">
-      {/* ================= TOP STRIP (THEME NỘI THẤT – MÀU FOOTER) ================= */}
+      {/* ================= TOP STRIP ================= */}
       <div className="bg-[#3B393A] py-1 border-b border-[#5A5758]">
         <div className="container px-4 sm:px-6 flex justify-between items-center">
           <p className="text-white text-[10px] sm:text-[12px] font-medium truncate">
-            Get up to 50% off new season styles, limited time only.
+            Giảm giá lên đến 50% cho các sản phẩm mùa mới – chỉ trong thời gian
+            có hạn!
           </p>
 
           <ul className="hidden sm:flex items-center gap-4">
             <li>
               <Link
-                to="/help-center"
+                to="#"
                 className="text-white text-[12px] font-medium hover:text-gray-300 transition"
               >
-                Help Center
+                Trung tâm hỗ trợ
               </Link>
             </li>
             <li>
               <Link
-                to="/order-tracking"
+                to="#"
                 className="text-white text-[12px] font-medium hover:text-gray-300 transition"
               >
-                Order Tracking
+                Theo dõi đơn hàng
               </Link>
             </li>
           </ul>
@@ -113,7 +114,7 @@ const Header = () => {
           <ul className="flex items-center gap-4 sm:gap-6 order-2 sm:order-3">
             {/* Cart */}
             <li>
-              <Tooltip title="Cart">
+              <Tooltip title="Giỏ hàng">
                 <IconButton onClick={() => navigate("/cart")}>
                   <StyledBadge badgeContent={cartCount} color="secondary">
                     <MdOutlineShoppingCart className="text-black text-lg" />
@@ -124,7 +125,7 @@ const Header = () => {
 
             {/* Wishlist */}
             <li>
-              <Tooltip title="Wishlist">
+              <Tooltip title="Yêu thích">
                 <IconButton>
                   <FaRegHeart className="text-black text-lg" />
                 </IconButton>
@@ -133,7 +134,7 @@ const Header = () => {
 
             {/* Notifications */}
             <li>
-              <Tooltip title="Notifications">
+              <Tooltip title="Thông báo">
                 <IconButton>
                   <StyledBadge badgeContent={10} color="secondary">
                     <MdNotificationsNone className="text-black text-lg" />
@@ -149,22 +150,13 @@ const Header = () => {
                   onClick={() => setShowAccountMenu(!showAccountMenu)}
                   className="flex items-center gap-2 font-medium text-[13px]"
                 >
-                  <img
-                    src={
-                      user?.profile_picture ||
-                      "https://th.bing.com/th/id/OIP.ByNwhzY5vUBvdIEfMCqDogHaHa"
-                    }
-                    className="w-6 h-6 rounded-full border object-cover"
-                  />
-                  <span>My Account</span>
+                  <FaUser className="text-lg text-black" />
+                  <span>Tài khoản của bạn</span>
                 </button>
 
-                {/* ACCOUNT DROPDOWN */}
+                {/* ACCOUNT MENU DROPDOWN */}
                 {showAccountMenu && (
-                  <div
-                    className="absolute right-0 mt-2 w-[220px] bg-white border border-gray-200 rounded-md
-                    shadow-lg z-50"
-                  >
+                  <div className="absolute right-0 mt-2 w-[220px] bg-white border border-gray-200 rounded-md shadow-lg z-50">
                     <div className="py-3 px-4 border-b">
                       <p className="text-sm font-medium truncate">
                         {user?.first_name} {user?.last_name}
@@ -181,7 +173,7 @@ const Header = () => {
                           onClick={() => setShowAccountMenu(false)}
                           className="block px-4 py-2 hover:bg-gray-100 text-sm"
                         >
-                          My Profile
+                          Hồ sơ cá nhân
                         </Link>
                       </li>
 
@@ -191,7 +183,7 @@ const Header = () => {
                           onClick={() => setShowAccountMenu(false)}
                           className="block px-4 py-2 hover:bg-gray-100 text-sm"
                         >
-                          My Orders ({orderCount})
+                          Đơn hàng của tôi ({orderCount})
                         </Link>
                       </li>
 
@@ -203,7 +195,7 @@ const Header = () => {
                             onClick={() => setShowAccountMenu(false)}
                             className="block px-4 py-2 hover:bg-gray-100 text-sm"
                           >
-                            Admin Dashboard
+                            Trang quản trị
                           </Link>
                         </li>
                       )}
@@ -215,7 +207,7 @@ const Header = () => {
                             onClick={() => setShowAccountMenu(false)}
                             className="block px-4 py-2 hover:bg-gray-100 text-sm"
                           >
-                            Vendor Dashboard
+                            Trang người bán
                           </Link>
                         </li>
                       )}
@@ -227,7 +219,7 @@ const Header = () => {
                             onClick={() => setShowAccountMenu(false)}
                             className="block px-4 py-2 hover:bg-gray-100 text-sm"
                           >
-                            Shipper Dashboard
+                            Trang giao hàng
                           </Link>
                         </li>
                       )}
@@ -237,7 +229,7 @@ const Header = () => {
                           onClick={handleLogout}
                           className="block w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 text-sm"
                         >
-                          Logout
+                          Đăng xuất
                         </button>
                       </li>
                     </ul>
@@ -251,7 +243,7 @@ const Header = () => {
                   className="flex items-center gap-1 font-medium text-[13px] text-black hover:text-gray-700"
                 >
                   <FaUser className="text-lg" />
-                  Login
+                  Đăng nhập
                 </Link>
               </li>
             )}

@@ -56,11 +56,14 @@ const handleGetUserById = async (req, res) => {
       ? parseInt(req.params.userId)
       : loggedInUserId;
 
-    if (roles.includes("customer") && requestedId !== loggedInUserId) {
-      return res.status(403).json({
-        success: false,
-        message: "Forbidden — Cannot view other users",
-      });
+    // CHỈ chặn customer, KHÔNG chặn admin
+    if (roles.includes("customer") && !roles.includes("admin")) {
+      if (requestedId !== loggedInUserId) {
+        return res.status(403).json({
+          success: false,
+          message: "Forbidden — Customers cannot view other users",
+        });
+      }
     }
 
     const result = await getUserById(requestedId);
@@ -161,6 +164,28 @@ const handleGetProfile = async (req, res) => {
     });
   }
 };
+const handleAdminUpdateUser = async (req, res) => {
+  try {
+    const targetUserId = parseInt(req.params.userId);
+
+    if (isNaN(targetUserId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const result = await updateUser(targetUserId, req.body);
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("handleAdminUpdateUser error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
 
 module.exports = {
   handleGetAllUsers,
@@ -172,4 +197,5 @@ module.exports = {
   handleUpdateUser,
   handleUploadAvatar,
   handleGetProfile,
+  handleAdminUpdateUser,
 };

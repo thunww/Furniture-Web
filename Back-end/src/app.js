@@ -76,7 +76,6 @@ app.use(`${API_PREFIX}/chat`, chatRoutes);
 app.use(`${API_PREFIX}/shops`, shopRoutes);
 app.use(`${API_PREFIX}/vendor`, vendorRoutes);
 app.use(`${API_PREFIX}/shippers`, shipperRoutes);
-app.use(`${API_PREFIX}/admin`, usersRoutes);
 
 /* -------------------------- ERRORS --------------------------- */
 app.use(handleUploadError);

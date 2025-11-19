@@ -188,7 +188,7 @@ const adminSlice = createSlice({
 
       .addCase(uploadAvatar.fulfilled, (state, action) => {
         if (state.myProfile) {
-          state.myProfile.profile_picture = action.payload.profile_picture;
+          state.myProfile.profile_picture = action.payload.data.profile_picture;
         }
       });
   },

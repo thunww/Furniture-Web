@@ -2,6 +2,7 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 const upload = require("../middleware/uploadMiddleware");
+const uploadLimiter = require("../middleware/uploadLimiter");
 
 const {
   handleGetAllUsers,
@@ -13,6 +14,7 @@ const {
   handleUpdateUser,
   handleUploadAvatar,
   handleGetProfile,
+  handleAdminUpdateUser,
 } = require("../controllers/usersController");
 
 const router = express.Router();
@@ -35,7 +37,7 @@ router.put(
   "/admin/users/:userId",
   authMiddleware,
   roleMiddleware(["admin"]),
-  handleUpdateUser
+  handleAdminUpdateUser
 );
 
 router.put(
@@ -59,6 +61,7 @@ router.put("/users/me", authMiddleware, handleUpdateUser);
 router.post(
   "/users/me/upload-avatar",
   authMiddleware,
+  uploadLimiter,
   upload.single("image"),
   handleUploadAvatar
 );
