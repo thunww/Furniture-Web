@@ -171,12 +171,12 @@ const Navigation = () => {
           {/* Phải: Go Shipper + Become a Vendor */}
           <div className="hidden lg:flex items-center gap-6">
             <Link to="/shipper/register" className="nav-link">
-              <MdDeliveryDining />
-              <span>Go Shipper</span>
+
+              <span></span>
             </Link>
             <Link to="/register-vendor" className="nav-link">
-              <Store />
-              <span>Become a Vendor</span>
+
+              <span></span>
             </Link>
           </div>
         </div>

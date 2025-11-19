@@ -139,7 +139,7 @@ const Login = () => {
           <div className="w-full md:w-1/2 bg-white p-8 bg-gradient-to-br from-white to-blue-50">
             <div className="max-w-md mx-auto">
               <div className="flex items-center mb-8">
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-3 rounded-full shadow-md">
+                <div className="bg-gradient-to-r from-stone-500 to-stone-600 p-3 rounded-full shadow-md">
                   <Lock className="text-white" size={24} />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-800 ml-3">Login</h2>
@@ -238,7 +238,7 @@ const Login = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={() => setRememberMe(!rememberMe)}
-                    className="h-4 w-4 text-indigo-600"
+                    className="h-4 w-4 text-stone-600"
                     disabled={isLocked}
                   />
                   <label
@@ -252,7 +252,7 @@ const Login = () => {
                 {/* Submit */}
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition"
+                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-stone-500 to-stone-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition"
                   disabled={isLoading || isExecutingCaptcha || isLocked}
                 >
                   {isLoading || isExecutingCaptcha ? (
