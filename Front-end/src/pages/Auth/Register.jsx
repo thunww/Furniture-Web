@@ -12,10 +12,36 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPasswordHint, setShowPasswordHint] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { message, error, isLoading } = useSelector((state) => state.auth);
+
+  // Kiểm tra mật khẩu mạnh: 8-64 ký tự, có hoa, thường, số, ký tự đặc biệt, không khoảng trắng
+  const isStrongPassword = (pw) => {
+    if (!pw) return false;
+    const checks = {
+      length: pw.length >= 8 && pw.length <= 64,
+      lowercase: /[a-z]/.test(pw),
+      uppercase: /[A-Z]/.test(pw),
+      number: /\d/.test(pw),
+      special: /[!@#$%^&*()\-_=+[{\]}\\|;:'",<.>/?`~]/.test(pw),
+      noSpace: !/\s/.test(pw),
+    };
+    return Object.values(checks).every(Boolean);
+  };
+
+  const passwordChecks = {
+    length: password.length >= 8 && password.length <= 64,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /\d/.test(password),
+    special: /[!@#$%^&*()\-_=+[{\]}\\|;:'",<.>/?`~]/.test(password),
+    noSpace: !/\s/.test(password),
+  };
+
+  const allPasswordValid = Object.values(passwordChecks).every(Boolean);
 
   // Reset thông báo
   useEffect(() => {
@@ -57,6 +83,11 @@ const Register = () => {
 
     if (password !== confirmPassword) {
       toast.error("Mật khẩu xác nhận không khớp!", { position: "top-right" });
+      return;
+    }
+
+    if (!isStrongPassword(password)) {
+      setShowPasswordHint(true); // hiển thị checklist, không gửi request
       return;
     }
 
@@ -156,10 +187,23 @@ const Register = () => {
                       className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm"
                       placeholder="Enter your password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setShowPasswordHint(true);
+                      }}
                       required
                     />
                   </div>
+                  {showPasswordHint && (
+                    <ul className="mt-2 text-sm space-y-1 text-gray-700">
+                      <PasswordRule ok={passwordChecks.length} text="Dài 8-64 ký tự" />
+                      <PasswordRule ok={passwordChecks.lowercase} text="Có chữ thường" />
+                      <PasswordRule ok={passwordChecks.uppercase} text="Có chữ hoa" />
+                      <PasswordRule ok={passwordChecks.number} text="Có số" />
+                      <PasswordRule ok={passwordChecks.special} text="Có ký tự đặc biệt" />
+                      <PasswordRule ok={passwordChecks.noSpace} text="Không có khoảng trắng" />
+                    </ul>
+                  )}
                 </div>
 
                 {/* Confirm Password */}
@@ -184,7 +228,15 @@ const Register = () => {
                 <button
                   type="submit"
                   className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 shadow-md"
-                  disabled={isLoading}
+                  disabled={
+                    isLoading ||
+                    !username.trim() ||
+                    !email.trim() ||
+                    !password.trim() ||
+                    !confirmPassword.trim() ||
+                    password !== confirmPassword ||
+                    !allPasswordValid
+                  }
                 >
                   {isLoading ? "Đang đăng ký..." : "Register"}
                   <ArrowRight className="ml-2 h-5 w-5" />
@@ -235,3 +287,12 @@ const Register = () => {
 };
 
 export default Register;
+
+const PasswordRule = ({ ok, text }) => {
+  return (
+    <li className={`flex items-center ${ok ? "text-green-600" : "text-red-600"}`}>
+      <span className="mr-2">{ok ? "✔" : "✖"}</span>
+      {text}
+    </li>
+  );
+};
