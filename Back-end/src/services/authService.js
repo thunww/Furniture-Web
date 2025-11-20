@@ -19,10 +19,25 @@ const CAPTCHA_THRESHOLD = 3;
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Kiểm tra độ mạnh mật khẩu: 8-64 ký tự, có hoa, thường, số, ký tự đặc biệt, không khoảng trắng
+const isStrongPassword = (password) => {
+  if (!password || password.length < 8 || password.length > 64) return false;
+  const strongRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+[{\]}\\|;:'",<.>/?`~]).{8,64}$/;
+  const hasWhitespace = /\s/;
+  return strongRegex.test(password) && !hasWhitespace.test(password);
+};
+
 // ========================== REGISTER ==========================
 const registerUser = async (username, email, password) => {
   if (!username || !email || !password)
     throw new Error("Thiếu thông tin đăng ký");
+
+  if (!isStrongPassword(password)) {
+    throw new Error(
+      "Mật khẩu phải dài 8-64 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt và không chứa khoảng trắng."
+    );
+  }
 
   // 🔍 Kiểm tra email đã tồn tại chưa
   const existingUser = await User.findOne({ where: { email } });
