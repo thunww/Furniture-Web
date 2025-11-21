@@ -272,7 +272,8 @@ const OrderManagement = () => {
           return data;
         } catch (error) {
           // If axios error, try to show server message, otherwise show error.message
-          const serverMessage = error?.response?.data?.message || error?.message;
+          const serverMessage =
+            error?.response?.data?.message || error?.message;
           Swal.showValidationMessage(`Request failed: ${serverMessage}`);
         }
       },
@@ -293,8 +294,6 @@ const OrderManagement = () => {
       setSelectedOrders([]);
     }
   };
-
-  
 
   const handleExportData = async () => {
     try {
@@ -324,14 +323,14 @@ const OrderManagement = () => {
         queryString ? `?${queryString}` : ""
       }`;
 
-      console.log("Exporting data with filters:", {
-        statusFilter: currentStatusFilter,
-        startDate: currentStartDate,
-        endDate: currentEndDate,
-        searchTerm: currentSearchTerm,
-      });
-      console.log("Generated query string:", queryString);
-      console.log("Calling export API with URL:", exportUrl);
+      // console.log("Exporting data with filters:", {
+      //   statusFilter: currentStatusFilter,
+      //   startDate: currentStartDate,
+      //   endDate: currentEndDate,
+      //   searchTerm: currentSearchTerm,
+      // });
+      // console.log("Generated query string:", queryString);
+      //console.log("Calling export API with URL:", exportUrl);
 
       // Call export API
       const response = await orderApi.exportOrders(queryString);
@@ -648,7 +647,9 @@ const OrderManagement = () => {
                     <div
                       key={item.order_item_id}
                       className={`flex items-center p-4 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-all duration-200 ${
-                        index !== Math.min(order.orderItems.length, 2) - 1 ? "mb-4" : ""
+                        index !== Math.min(order.orderItems.length, 2) - 1
+                          ? "mb-4"
+                          : ""
                       }`}
                     >
                       <div className="flex-shrink-0 mr-6">
@@ -715,7 +716,8 @@ const OrderManagement = () => {
 
                   {order.orderItems.length > 2 && (
                     <div className="text-sm text-slate-600 mt-2">
-                      +{order.orderItems.length - 2} more item(s). Click "View Order Details" to see all.
+                      +{order.orderItems.length - 2} more item(s). Click "View
+                      Order Details" to see all.
                     </div>
                   )}
                 </div>
@@ -932,7 +934,7 @@ const OrderManagement = () => {
                   <CheckCircle className="mr-2 w-5 h-5" />
                   Process Selected Orders
                 </button>
-                
+
                 <button
                   onClick={handleExportData}
                   className="flex items-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 font-medium shadow-sm hover:shadow-md"

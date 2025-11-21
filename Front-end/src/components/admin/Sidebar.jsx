@@ -2,21 +2,20 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LayoutDashboard,
-  ShoppingCart,
-  Package,
   Users,
   BarChart2,
   Settings,
   Truck,
-  DollarSign,
   Store,
-  MessageSquare,
-  FileText,
-  Image,
+  Package,
   Folder,
   LogOut,
   Layout,
   ChevronDown,
+  DollarSign,
+  MessageSquare,
+  FileText,
+  Image,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen }) => {
@@ -41,7 +40,7 @@ const Sidebar = ({ isOpen }) => {
         <div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden">
           <img
             src="https://static.vecteezy.com/system/resources/previews/020/429/953/original/admin-icon-vector.jpg"
-            alt="Shop Avatar"
+            alt="Admin Avatar"
             className="w-full h-full object-cover"
           />
         </div>
@@ -57,29 +56,30 @@ const Sidebar = ({ isOpen }) => {
           isOpen={isOpen}
         />
         <SidebarItem
-          to="/admin/overview"
+          to="#"
           icon={<BarChart2 size={20} />}
           label="Overview"
           isOpen={isOpen}
         />
         <SidebarItem
-          to="/admin/sales"
+          to="#"
           icon={<DollarSign size={20} />}
           label="Sales Analytics"
           isOpen={isOpen}
         />
         <SidebarItem
-          to="/admin/top-products"
+          to="#"
           icon={<Package size={20} />}
           label="Top Products"
           isOpen={isOpen}
         />
         <SidebarItem
-          to="/admin/recent-activities"
+          to="#"
           icon={<FileText size={20} />}
           label="Recent Activities"
           isOpen={isOpen}
         />
+
         <SidebarDropdown
           label="Page Layout"
           icon={<Layout size={20} />}
@@ -88,16 +88,13 @@ const Sidebar = ({ isOpen }) => {
           onClick={() => toggleDropdown("page")}
         >
           <SidebarItem to="/" label="Home" isOpen={isOpen} />
-          <SidebarItem
-            to="/admin/page-layout/footer"
-            label="Footer"
-            isOpen={isOpen}
-          />
+          <SidebarItem to="#" label="Footer" isOpen={isOpen} />
         </SidebarDropdown>
       </SidebarSection>
 
       {/* MANAGEMENT Section */}
       <SidebarSection title="Management" isOpen={isOpen}>
+        {/* 5 mục giữ nguyên link */}
         <SidebarItem
           to="/admin/users"
           label="Users"
@@ -128,8 +125,10 @@ const Sidebar = ({ isOpen }) => {
           label="Shippers"
           isOpen={isOpen}
         />
+
+        {/* Các mục khác → # */}
         <SidebarItem
-          to="/admin/transactions"
+          to="#"
           icon={<DollarSign size={20} />}
           label="Transactions"
           isOpen={isOpen}
@@ -139,25 +138,25 @@ const Sidebar = ({ isOpen }) => {
       {/* CONTENT Section */}
       <SidebarSection title="Content" isOpen={isOpen}>
         <SidebarItem
-          to="/admin/chat"
+          to="#"
           icon={<MessageSquare size={20} />}
           label="Chat"
           isOpen={isOpen}
         />
         <SidebarItem
-          to="/admin/posts"
+          to="#"
           icon={<FileText size={20} />}
           label="Posts"
           isOpen={isOpen}
         />
         <SidebarItem
-          to="/admin/reviews"
+          to="#"
           icon={<MessageSquare size={20} />}
           label="Comments"
           isOpen={isOpen}
         />
         <SidebarItem
-          to="/admin/media"
+          to="#"
           icon={<Image size={20} />}
           label="Media"
           isOpen={isOpen}
@@ -167,7 +166,7 @@ const Sidebar = ({ isOpen }) => {
       {/* ANALYTICS Section */}
       <SidebarSection title="Analytics" isOpen={isOpen}>
         <SidebarItem
-          to="/admin/reports"
+          to="#"
           icon={<BarChart2 size={20} />}
           label="Reports"
           isOpen={isOpen}
@@ -177,7 +176,7 @@ const Sidebar = ({ isOpen }) => {
       {/* SETTINGS Section */}
       <SidebarSection title="Settings" isOpen={isOpen}>
         <SidebarItem
-          to="/admin/settings"
+          to="#"
           icon={<Settings size={20} />}
           label="Settings"
           isOpen={isOpen}
@@ -229,6 +228,7 @@ const SidebarDropdown = ({
       <div className="flex items-center gap-3">
         {icon} {isOpen && <span>{label}</span>}
       </div>
+
       {isOpen && (
         <ChevronDown
           size={16}

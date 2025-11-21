@@ -7,15 +7,17 @@ const {
   logoutUser,
   forgotPassword,
   resetPassword,
-  getUserProfile,
 } = require("../services/authService");
 const { verifyToken } = require("../config/jwt");
 require("dotenv").config();
 
+const isProd = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+  secure: isProd ? true : false,
+  sameSite: isProd ? "None" : "Lax",
+  domain: isProd ? process.env.COOKIE_DOMAIN : undefined,
   path: "/",
 };
 
@@ -203,16 +205,23 @@ const handleForgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
+    //  Validate email
+    if (!email) {
+      return res.status(400).json({
+        message: "Email không được để trống.",
+      });
+    }
+
     const result = await forgotPassword(email);
 
     return res.status(200).json(result);
   } catch (error) {
-    if (error.message === "No user found with this email") {
-      return res.status(404).json({ message: error.message });
-    }
-    console.error("Error in forgotPassword:", error);
-    return res.status(500).json({
-      message: "Failed to send reset password email, please try again later",
+    console.error("[ERROR] Forgot password error:", error.message);
+
+    // ✅ Luôn return generic message để tránh lộ thông tin
+    return res.status(200).json({
+      message:
+        "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được hướng dẫn đặt lại mật khẩu.",
     });
   }
 };
@@ -222,23 +231,71 @@ const handleResetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 
+    // ✅ Validate inputs
+    if (!token) {
+      return res.status(400).json({
+        message: "Thiếu token đặt lại mật khẩu.",
+      });
+    }
+
+    if (!newPassword) {
+      return res.status(400).json({
+        message: "Mật khẩu mới không được để trống.",
+      });
+    }
+
+    // ✅ Call service
     const resultMessage = await resetPassword(token, newPassword);
 
-    return res.status(200).json({ message: resultMessage });
+    return res.status(200).json({
+      message: resultMessage,
+      success: true,
+    });
   } catch (error) {
-    console.error("Error in resetPassword:", error);
+    console.error("[ERROR] Reset password error:", error.message);
 
-    if (error.name === "TokenExpiredError") {
-      return res.status(400).json({ message: "Reset token has expired" });
-    }
-    if (error.message === "Reset token is required") {
-      return res.status(400).json({ message: "Reset token is required" });
-    }
-    if (error.message === "User not found") {
-      return res.status(404).json({ message: "User not found" });
+    // ✅ Handle specific errors
+    if (
+      error.name === "TokenExpiredError" ||
+      error.message.includes("hết hạn")
+    ) {
+      return res.status(400).json({
+        message: "Link đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu lại.",
+        expired: true,
+      });
     }
 
-    return res.status(500).json({ message: "Internal server error" });
+    if (
+      error.message.includes("Token không hợp lệ") ||
+      error.message.includes("Thiếu token")
+    ) {
+      return res.status(400).json({
+        message: error.message,
+      });
+    }
+
+    if (error.message.includes("Không tìm thấy tài khoản")) {
+      return res.status(404).json({
+        message: "Không tìm thấy tài khoản.",
+      });
+    }
+
+    if (error.message.includes("Mật khẩu phải có ít nhất")) {
+      return res.status(400).json({
+        message: error.message,
+      });
+    }
+
+    if (error.message.includes("bị khóa")) {
+      return res.status(403).json({
+        message: error.message,
+      });
+    }
+
+    // ✅ Generic error
+    return res.status(500).json({
+      message: "Đã xảy ra lỗi khi đặt lại mật khẩu. Vui lòng thử lại sau.",
+    });
   }
 };
 
@@ -265,28 +322,6 @@ const handleLogout = async (req, res) => {
   }
 };
 
-// ========================== GET PROFILE ==========================
-const handleGetProfile = async (req, res) => {
-  try {
-    const accessToken = req.cookies?.accessToken;
-    if (!accessToken) {
-      return res.status(401).json({ message: "Unauthorized - No token" });
-    }
-
-    const profile = await getUserProfile(accessToken);
-
-    return res.status(200).json({
-      message: "Profile retrieved successfully",
-      user: profile,
-    });
-  } catch (error) {
-    console.error("Get profile error:", error.message);
-    return res.status(401).json({
-      message: error.message || "Failed to get profile",
-    });
-  }
-};
-
 module.exports = {
   handleregisterUser,
   handleLoginUser,
@@ -296,5 +331,4 @@ module.exports = {
   handleForgotPassword,
   handleResetPassword,
   handleLogout,
-  handleGetProfile,
 };

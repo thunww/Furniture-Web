@@ -20,61 +20,61 @@ const HomeSlider = () => {
           className="sliderHome"
         >
           <SwiperSlide>
-            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden">
+            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://theme.hstatic.net/200000065946/1001264503/14/slideshow_3.jpg?v=1322"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden">
+            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zg8u93ojlk86_xxhdpi"
+                src="https://theme.hstatic.net/200000065946/1001264503/14/slideshow_4.jpg?v=1322"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden">
+            <div className="item rounded-[10px] sm:rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6z9ddjohsu056_xxhdpi"
+                src="https://theme.hstatic.net/200000065946/1001264503/14/slideshow_1_master.jpg?v=1322"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[20px] overflow-hidden">
+            <div className="item rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://theme.hstatic.net/200000065946/1001264503/14/background_banner_2.jpg?v=1322"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[20px] overflow-hidden">
+            <div className="item rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://theme.hstatic.net/200000065946/1001264503/14/background_banner_3.jpg?v=1322"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>
 
           <SwiperSlide>
-            <div className="item rounded-[20px] overflow-hidden">
+            <div className="item rounded-[20px] overflow-hidden h-[180px] sm:h-[260px] md:h-[400px]">
               <img
-                src="https://cf.shopee.vn/file/vn-11134258-7ra0g-m6zggds6byxt8d_xxhdpi"
+                src="https://file.hoaphat.com.vn/hoaphat-com-vn/2024/08/slide-pc.jpg.webp"
                 alt="Banner slide"
-                className="w-full"
+                className="w-full h-full object-cover"
               />
             </div>
           </SwiperSlide>

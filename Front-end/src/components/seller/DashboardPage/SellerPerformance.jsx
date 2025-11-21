@@ -9,79 +9,84 @@ const SellerPerformance = () => {
     totalReviews: 120,
     responseRate: 98,
     loading: true,
-    error: null
+    error: null,
   });
 
   // Tính toán rank dựa trên rating
   const calculateRank = (rating) => {
-    if (rating >= 4.5) return 'Excellent';
-    if (rating >= 4.0) return 'Good';
-    return 'Normal';
+    if (rating >= 4.5) return "Excellent";
+    if (rating >= 4.0) return "Good";
+    return "Normal";
   };
 
   useEffect(() => {
     const fetchShopData = async () => {
       try {
-        console.log('Đang lấy dữ liệu shop...');
-        
+        //console.log('Đang lấy dữ liệu shop...');
+
         // Cập nhật trạng thái loading
-        setShopData(prev => ({
+        setShopData((prev) => ({
           ...prev,
           loading: true,
-          error: null
+          error: null,
         }));
-        
+
         // Gọi API lấy thông tin shop
-        console.log('Gọi shopApi.getShopInfo()...');
+        //console.log("Gọi shopApi.getShopInfo()...");
         const response = await shopApi.getShopInfo();
-        console.log('API response:', response);
-        console.log('Shop data:', response.data);
-        
+        // console.log("API response:", response);
+        // console.log("Shop data:", response.data);
+
         // Sử dụng thông tin shop từ API
         const shopInfo = response.data;
-        
+
         // Kiểm tra xem có dữ liệu rating không
         if (!shopInfo || shopInfo.rating === undefined) {
-          console.log('Không tìm thấy rating từ API, sử dụng dữ liệu mẫu');
+          // console.log("Không tìm thấy rating từ API, sử dụng dữ liệu mẫu");
           // Giữ nguyên dữ liệu mẫu và cập nhật trạng thái loading
-          setShopData(prev => ({
+          setShopData((prev) => ({
             ...prev,
-            loading: false
+            loading: false,
           }));
           return;
         }
-        
+
         // Kiểm tra kiểu dữ liệu
-        console.log('Shop rating:', shopInfo.rating, 'Type:', typeof shopInfo.rating);
-        
+        // console.log(
+        //   "Shop rating:",
+        //   shopInfo.rating,
+        //   "Type:",
+        //   typeof shopInfo.rating
+        // );
+
         // Format dữ liệu
         const formattedRating = parseFloat(shopInfo.rating) || 0;
-        console.log('Formatted rating:', formattedRating);
-        
+        // console.log("Formatted rating:", formattedRating);
+
         // Cập nhật state với dữ liệu từ API
         setShopData({
           rating: formattedRating,
           totalReviews: shopInfo.totalReviews || 120,
           responseRate: shopInfo.responseRate || 98,
           loading: false,
-          error: null
+          error: null,
         });
-        
-        console.log('ShopData đã được cập nhật:', {
-          rating: formattedRating,
-          totalReviews: shopInfo.totalReviews || 120,
-          responseRate: shopInfo.responseRate || 98
-        });
+
+        // console.log("ShopData đã được cập nhật:", {
+        //   rating: formattedRating,
+        //   totalReviews: shopInfo.totalReviews || 120,
+        //   responseRate: shopInfo.responseRate || 98,
+        // });
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu shop:", error);
         console.error("Chi tiết lỗi:", error.response || error.message);
-        
+
         // Giữ nguyên dữ liệu mẫu khi có lỗi
-        console.log('Sử dụng dữ liệu mẫu do lỗi API');
-        setShopData(prev => ({
-          ...prev,
-          loading: false
-        }));
+        // console.log("Sử dụng dữ liệu mẫu do lỗi API");
+        // setShopData((prev) => ({
+        //   ...prev,
+        //   loading: false,
+        // }));
       }
     };
 
@@ -91,23 +96,23 @@ const SellerPerformance = () => {
   // Lấy màu cho rank
   const getRankColor = (rank) => {
     const colors = {
-      'Excellent': 'text-green-600',
-      'Good': 'text-blue-600',
-      'Normal': 'text-yellow-600'
+      Excellent: "text-green-600",
+      Good: "text-blue-600",
+      Normal: "text-yellow-600",
     };
-    return colors[rank] || 'text-gray-600';
+    return colors[rank] || "text-gray-600";
   };
 
   // Tính toán rank dựa vào rating hiện tại
   const rank = calculateRank(shopData.rating);
-  
+
   // Log debug
-  console.log('Rendering SellerPerformance với:', {
-    rating: shopData.rating,
-    rank,
-    loading: shopData.loading,
-    error: shopData.error
-  });
+  // console.log("Rendering SellerPerformance với:", {
+  //   rating: shopData.rating,
+  //   rank,
+  //   loading: shopData.loading,
+  //   error: shopData.error,
+  // });
 
   // Render sao (stars)
   const renderStars = (rating) => {
@@ -117,9 +122,7 @@ const SellerPerformance = () => {
           <FaStar
             key={star}
             className={`w-4 h-4 ${
-              star <= rating
-                ? "text-yellow-400"
-                : "text-gray-300"
+              star <= rating ? "text-yellow-400" : "text-gray-300"
             }`}
           />
         ))}
@@ -129,7 +132,9 @@ const SellerPerformance = () => {
 
   return (
     <Card>
-      <div className="border-b pb-2 mb-2 font-bold text-lg">Seller Efficiency</div>
+      <div className="border-b pb-2 mb-2 font-bold text-lg">
+        Seller Efficiency
+      </div>
       <div className="p-2 space-y-2 text-gray-700">
         <div className="flex justify-between">
           <span>Rank:</span>
@@ -143,7 +148,7 @@ const SellerPerformance = () => {
             </span>
           )}
         </div>
-        
+
         <div className="flex justify-between items-center">
           <span>Average rating:</span>
           {shopData.loading ? (
@@ -167,9 +172,7 @@ const SellerPerformance = () => {
           ) : shopData.error ? (
             <span className="text-red-500 text-sm">{shopData.error}</span>
           ) : (
-            <span className="font-semibold">
-              {shopData.responseRate}%
-            </span>
+            <span className="font-semibold">{shopData.responseRate}%</span>
           )}
         </div>
 

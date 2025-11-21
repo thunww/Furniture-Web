@@ -2,6 +2,7 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 const upload = require("../middleware/uploadMiddleware");
+const uploadLimiter = require("../middleware/uploadLimiter");
 
 const {
   handleGetAllUsers,
@@ -12,9 +13,28 @@ const {
   handleUnbanUser,
   handleUpdateUser,
   handleUploadAvatar,
+  handleGetProfile,
+  handleAdminUpdateUser,
 } = require("../controllers/usersController");
 
 const router = express.Router();
+
+// ----------- STATIC ROUTES FIRST -------------
+router.put(
+  "/admin/users/ban",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  handleBanUser
+);
+
+router.put(
+  "/admin/users/unban",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  handleUnbanUser
+);
+
+// ---------------------------------------------
 
 router.get(
   "/admin/users",
@@ -23,50 +43,28 @@ router.get(
   handleGetAllUsers
 );
 
-router.post(
-  "/admin/users/assign-role",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  handleAssignRoleToUser
-);
-
-router.post(
-  "/admin/users/remove-role",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  handleRemoveRoleFromUser
-);
-
 router.get(
-  "/users/:userId",
+  "/admin/users/:userId",
   authMiddleware,
-  roleMiddleware(["admin", "customer"]),
+  roleMiddleware(["admin"]),
   handleGetUserById
 );
 
 router.put(
-  "/admin/users/ban/",
+  "/admin/users/:userId",
   authMiddleware,
   roleMiddleware(["admin"]),
-  handleBanUser
+  handleAdminUpdateUser
 );
 
-router.put(
-  "/admin/users/unban/",
-  authMiddleware,
-  roleMiddleware(["admin"]),
-  handleUnbanUser
-);
+router.get("/users/me", authMiddleware, handleGetProfile);
 
-router.put(
-  "/users/:userId",
-  authMiddleware,
-  roleMiddleware(["customer"]),
-  handleUpdateUser
-);
+router.put("/users/me", authMiddleware, handleUpdateUser);
+
 router.post(
-  "/users/upload-avatar",
+  "/users/me/upload-avatar",
   authMiddleware,
+  uploadLimiter,
   upload.single("image"),
   handleUploadAvatar
 );

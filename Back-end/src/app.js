@@ -27,7 +27,7 @@ const shipperRoutes = require("./routes/shipperRoutes");
 const { handleUploadError } = require("./middleware/upload");
 
 const app = express();
-
+app.set("trust proxy", 1);
 /* ---------------------- SECURITY CONFIG ---------------------- */
 app.use(
   helmet({
@@ -76,7 +76,6 @@ app.use(`${API_PREFIX}/chat`, chatRoutes);
 app.use(`${API_PREFIX}/shops`, shopRoutes);
 app.use(`${API_PREFIX}/vendor`, vendorRoutes);
 app.use(`${API_PREFIX}/shippers`, shipperRoutes);
-app.use(`${API_PREFIX}/admin`, usersRoutes);
 
 /* -------------------------- ERRORS --------------------------- */
 app.use(handleUploadError);

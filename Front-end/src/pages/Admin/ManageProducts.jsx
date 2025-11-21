@@ -38,8 +38,6 @@ const ManageProducts = () => {
     dispatch(fetchAllShops());
   }, [dispatch]);
 
-  console.log(products);
-
   const filteredProducts =
     products?.filter((product) => {
       const matchesSearch = product.product_name

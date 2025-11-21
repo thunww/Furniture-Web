@@ -136,7 +136,7 @@ const Search = () => {
 
           <button
             onClick={handleSearch}
-            className="bg-blue-600 hover:bg-blue-700 transition-colors text-white flex items-center justify-center h-8 w-8 rounded-full m-1"
+            className="border-stone-400 bg-stone-500 transition-colors text-white flex items-center justify-center h-8 w-8 rounded-full m-1"
           >
             <IoSearchSharp className="text-base" />
           </button>

@@ -78,7 +78,7 @@ const Header = () => {
           // Nếu API trả về {logo: ...}
           setShopLogo(shopData.logo);
         } else {
-          console.log("Không tìm thấy logo shop trong response API");
+          // console.log("Không tìm thấy logo shop trong response API");
         }
       } catch (error) {
         console.error("Lỗi khi lấy thông tin shop:", error);

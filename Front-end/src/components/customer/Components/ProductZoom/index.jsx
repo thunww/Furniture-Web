@@ -41,7 +41,7 @@ const ProductZoom = ({ images, currentImage }) => {
 
   const handleShare = (platform) => {
     // Logic chia sẻ (có thể thêm URL thực tế sau)
-    console.log(`Chia sẻ lên ${platform}`);
+    //console.log(`Chia sẻ lên ${platform}`);
   };
 
   if (!images || images.length === 0) {

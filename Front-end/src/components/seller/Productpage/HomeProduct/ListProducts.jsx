@@ -77,13 +77,21 @@ const VendorProductManagement = () => {
         const data = resp && resp.data ? resp.data : resp;
         // Support both shapes: { success:true, data: { revenue: [...] } } or { year, revenue }
         let revenueArray = [];
-        if (data && data.success && data.data && Array.isArray(data.data.revenue)) {
+        if (
+          data &&
+          data.success &&
+          data.data &&
+          Array.isArray(data.data.revenue)
+        ) {
           revenueArray = data.data.revenue;
         } else if (data && Array.isArray(data.revenue)) {
           revenueArray = data.revenue;
         }
 
-        const total = revenueArray.reduce((sum, v) => sum + (parseFloat(v) || 0), 0);
+        const total = revenueArray.reduce(
+          (sum, v) => sum + (parseFloat(v) || 0),
+          0
+        );
         setTotalRevenue(total);
       } catch (error) {
         console.error("Error fetching monthly revenue:", error);
@@ -110,7 +118,7 @@ const VendorProductManagement = () => {
         currentCategoryId,
         currentSortBy
       );
-      console.log("API Response:", response);
+      // console.log("API Response:", response);
 
       if (response?.data?.success) {
         setProducts(response.data.data);
@@ -194,7 +202,7 @@ const VendorProductManagement = () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
       try {
         const response = await productApi.deleteProduct(productId);
-        console.log("Response từ API:", response);
+        //console.log("Response từ API:", response);
 
         // Cập nhật lại danh sách sản phẩm sau khi xóa (áp dụng lại các filter hiện tại)
         const categoryObj = categoriesList.find(

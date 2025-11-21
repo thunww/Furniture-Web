@@ -5,7 +5,7 @@ const orderApi = {
     const url = "orders/create";
     try {
       const response = await axiosClient.post(url, orderData);
-      console.log("API response:", response);
+      //console.log("API response:", response);
       return response;
     } catch (error) {
       console.error("Lỗi khi gọi API tạo đơn hàng:", error);

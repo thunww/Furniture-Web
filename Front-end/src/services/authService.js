@@ -38,6 +38,16 @@ const authService = {
     const response = await authApi.loginWithGoogle(googleToken);
     return response.data;
   },
+  // ========================== PASSWORD ==========================
+  forgotPassword: async (email) => {
+    const response = await authApi.forgotPassword(email);
+    return response.data;
+  },
+
+  resetPassword: async (token, newPassword) => {
+    const response = await authApi.resetPassword(token, newPassword);
+    return response.data;
+  },
 };
 
 export default authService;

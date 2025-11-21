@@ -77,129 +77,6 @@ const checkDuplicateProductName = async (req, res, next) => {
   }
 };
 
-// Hàm xử lý tạo sản phẩm
-const createProduct = async (req, res, next) => {
-  try {
-    // Lấy userId từ token xác thực
-    if (!req.user || !req.user.user_id) {
-      if (req.uploadedImages && req.uploadedImages.length > 0) {
-        await deleteImagesByUrls(req.uploadedImages);
-      }
-      return res.status(401).json({
-        success: false,
-        message: "Không có quyền truy cập",
-      });
-    }
-
-    const userId = req.user.user_id;
-
-    // Kiểm tra các trường bắt buộc
-    const { productName, price, stock, category } = req.body;
-    if (!productName || !price || !stock || !category) {
-      if (req.uploadedImages && req.uploadedImages.length > 0) {
-        await deleteImagesByUrls(req.uploadedImages);
-      }
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu thông tin bắt buộc",
-      });
-    }
-
-    // Tìm shop của user
-    const shop = await Shop.findOne({ where: { owner_id: userId } });
-    if (!shop) {
-      if (req.uploadedImages && req.uploadedImages.length > 0) {
-        await deleteImagesByUrls(req.uploadedImages);
-      }
-      return res.status(400).json({
-        success: false,
-        message: "Không tìm thấy shop",
-      });
-    }
-
-    // KIỂM TRA TÊN TRÙNG TỪ req.body
-    const existingProduct = await Product.findOne({
-      where: { product_name: productName, shop_id: shop.shop_id },
-    });
-
-    if (existingProduct) {
-      // Nếu tên trùng, xóa ảnh đã upload
-      if (req.uploadedImages && req.uploadedImages.length > 0) {
-        await deleteImagesByUrls(req.uploadedImages);
-      }
-      return res.status(400).json({
-        success: false,
-        message: `Sản phẩm có tên "${productName}" đã tồn tại trong shop của bạn. Vui lòng chọn tên khác.`,
-      });
-    }
-
-    // Xử lý các trường JSON
-    let parsedVariations = [];
-    if (req.body.variations) {
-      try {
-        parsedVariations =
-          typeof req.body.variations === "string"
-            ? JSON.parse(req.body.variations)
-            : req.body.variations;
-
-        if (!Array.isArray(parsedVariations)) {
-          parsedVariations = [];
-        }
-      } catch (e) {
-        console.error("Lỗi parse variations:", e);
-        parsedVariations = [];
-      }
-    }
-
-    let parsedParcelSize = null;
-    if (req.body.parcelSize) {
-      try {
-        parsedParcelSize =
-          typeof req.body.parcelSize === "string"
-            ? JSON.parse(req.body.parcelSize)
-            : req.body.parcelSize;
-      } catch (e) {
-        console.error("Lỗi parse parcelSize:", e);
-        parsedParcelSize = { width: 20, height: 10, length: 5 };
-      }
-    }
-
-    // Xử lý dữ liệu ảnh
-    let cloudinaryImages = req.uploadedImages || [];
-    let primaryImageUrl = null;
-
-    if (req.files && req.files.primaryImage && req.files.primaryImage[0]) {
-      primaryImageUrl = req.files.primaryImage[0].path;
-    } else if (cloudinaryImages.length > 0) {
-      primaryImageUrl = cloudinaryImages[0];
-    }
-
-    // Gọi service để tạo sản phẩm
-    const result = await productService.createProduct({
-      productName,
-      description: req.body.description,
-      price,
-      stock,
-      category,
-      userId,
-      shop_id: shop.shop_id,
-      primaryImageUrl,
-      images: cloudinaryImages,
-      variations: parsedVariations,
-      parcelSize: parsedParcelSize,
-      weight: req.body.weight,
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: "Tạo sản phẩm thành công",
-      data: result,
-    });
-  } catch (error) {
-    // Chuyển lỗi cho middleware handleProductError xử lý
-    next(error);
-  }
-};
 const deleteProductImage = async (req, res) => {
   try {
     const { image_id } = req.params;
@@ -473,7 +350,6 @@ module.exports = {
   getProductsByCategoryId,
   suggestProducts,
   deleteProductImage,
-  createProduct,
   checkDuplicateProductName,
   getProductDetails,
 };

@@ -9,7 +9,7 @@ module.exports = {
         first_name: "John",
         last_name: "Doe",
         username: "johndoe",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "johndoe@example.com",
         phone: "123456789",
         gender: "male",
@@ -22,8 +22,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -32,7 +32,7 @@ module.exports = {
         first_name: "Jane",
         last_name: "Smith",
         username: "janesmith",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "janesmith@example.com",
         phone: "987654321",
         gender: "female",
@@ -45,8 +45,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -55,7 +55,7 @@ module.exports = {
         first_name: "Admin",
         last_name: "User",
         username: "admin",
-        password: await hashPassword("admin"),
+        password: await hashPassword("Admin123!"),
         email: "admin@example.com",
         phone: "000000000",
         gender: "male",
@@ -68,8 +68,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -78,7 +78,7 @@ module.exports = {
         first_name: "Alice",
         last_name: "Brown",
         username: "alicebrown",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "alice@example.com",
         phone: "111111111",
         gender: "female",
@@ -91,8 +91,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -101,7 +101,7 @@ module.exports = {
         first_name: "Bob",
         last_name: "Johnson",
         username: "bobjohnson",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "bob@example.com",
         phone: "222222222",
         gender: "male",
@@ -114,8 +114,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -124,7 +124,7 @@ module.exports = {
         first_name: "Charlie",
         last_name: "Davis",
         username: "charliedavis",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "charlie@example.com",
         phone: "333333333",
         gender: "male",
@@ -137,8 +137,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -147,7 +147,7 @@ module.exports = {
         first_name: "David",
         last_name: "Miller",
         username: "davidmiller",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "david@example.com",
         phone: "444444444",
         gender: "male",
@@ -160,8 +160,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -170,7 +170,7 @@ module.exports = {
         first_name: "Emma",
         last_name: "Wilson",
         username: "emmawilson",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "emma@example.com",
         phone: "555555555",
         gender: "female",
@@ -183,8 +183,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -193,7 +193,7 @@ module.exports = {
         first_name: "Frank",
         last_name: "Clark",
         username: "frankclark",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "frank@example.com",
         phone: "666666666",
         gender: "male",
@@ -205,8 +205,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -215,7 +215,7 @@ module.exports = {
         first_name: "Grace",
         last_name: "Lee",
         username: "gracelee",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "grace@example.com",
         phone: "777777777",
         gender: "female",
@@ -227,8 +227,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -237,7 +237,7 @@ module.exports = {
         first_name: "Henry",
         last_name: "White",
         username: "henrywhite",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "henry@example.com",
         phone: "888888888",
         gender: "male",
@@ -250,8 +250,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -260,7 +260,7 @@ module.exports = {
         first_name: "Ivy",
         last_name: "Harris",
         username: "ivyharris",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "ivy@example.com",
         phone: "999999999",
         gender: "female",
@@ -273,8 +273,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -283,7 +283,7 @@ module.exports = {
         first_name: "Jack",
         last_name: "Anderson",
         username: "jackanderson",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "jack@example.com",
         phone: "101010101",
         gender: "male",
@@ -296,8 +296,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -306,7 +306,7 @@ module.exports = {
         first_name: "Kevin",
         last_name: "Scott",
         username: "kevinscott",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "kevin@example.com",
         phone: "141414141",
         gender: "male",
@@ -318,8 +318,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -328,7 +328,7 @@ module.exports = {
         first_name: "Laura",
         last_name: "Young",
         username: "laurayoung",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "laura@example.com",
         phone: "151515151",
         gender: "female",
@@ -340,8 +340,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -350,7 +350,7 @@ module.exports = {
         first_name: "Michael",
         last_name: "King",
         username: "michaelking",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "michael@example.com",
         phone: "161616161",
         gender: "male",
@@ -362,8 +362,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -372,7 +372,7 @@ module.exports = {
         first_name: "Nancy",
         last_name: "Evans",
         username: "nancyevans",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "nancy@example.com",
         phone: "171717171",
         gender: "female",
@@ -384,8 +384,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -394,7 +394,7 @@ module.exports = {
         first_name: "Oscar",
         last_name: "Green",
         username: "oscargreen",
-        password: await hashPassword("password123"),
+        password: await hashPassword("Password123!"),
         email: "oscar@example.com",
         phone: "181818181",
         gender: "male",
@@ -406,8 +406,8 @@ module.exports = {
         login_attempts: 0,
         locked_until: null,
         last_failed_login: null,
-        google_id: null, // ← THÊM
-        auth_provider: "local", // ← THÊM
+        google_id: null,
+        auth_provider: "local",
         created_at: new Date(),
         updated_at: new Date(),
       },

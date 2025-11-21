@@ -12,15 +12,6 @@ const {
 
 router.get("/", productController.getAllProducts);
 
-router.post(
-  "/create",
-  authMiddleware,
-  roleMiddleware(["vendor"]),
-  parseFormAndUpload, // Upload ảnh & parse form data
-  productController.createProduct, // Controller kiểm tra tên + tạo sản phẩm
-  handleProductError // Xử lý lỗi và xóa ảnh
-);
-
 // Route xóa hình ảnh sản phẩm
 router.delete(
   "/image/:image_id",

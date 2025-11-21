@@ -3,15 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import { HiOutlineMenuAlt1 } from "react-icons/hi";
 import { FaBars } from "react-icons/fa";
-import { MdDeliveryDining } from "react-icons/md";
-import { Store } from "lucide-react";
 
 import CategoryPanel from "./CategoryPanel";
 import "../Navigation/style.css";
 
 /**
- * ====== DỮ LIỆU: dùng category_id thống nhất ======
- * Map ID theo DB thực tế của bạn (giống với CategoryPanel.jsx)
+ * ====== DỮ LIỆU DANH MỤC SẢN PHẨM ======
  */
 const PRODUCTS_COLS = [
   {
@@ -64,14 +61,14 @@ const PRODUCTS_COLS = [
   },
 ];
 
-// (Tùy chọn) Menu phòng – không bắt buộc dùng tới trong ví dụ này
-const ROOMS = [
-  { label: "Phòng khách", categoryId: 1 },
-  { label: "Phòng ăn", categoryId: 2 },
-  { label: "Phòng ngủ", categoryId: 3 },
-  { label: "Phòng làm việc", categoryId: 30 }, // chỉnh theo ID thực
-  { label: "Phòng bếp", categoryId: 5 },
-  { label: "Ngoại thất", categoryId: 28 }, // nếu có
+/**
+ * ====== NAV EXTRA ITEMS — không điều hướng (URL "#") ======
+ */
+const NAV_EXTRA_ITEMS = [
+  { label: "PHÒNG", to: "#" },
+  { label: "BỘ SƯU TẬP", to: "#" },
+  { label: "THIẾT KẾ NỘI THẤT", to: "#" },
+  { label: "GÓC CẢM HỨNG", to: "#" },
 ];
 
 const Navigation = () => {
@@ -82,7 +79,6 @@ const Navigation = () => {
 
   const openCategoryPanel = () => setIsOpenCatPanel(true);
 
-  // Dùng category_id để điều hướng (đồng bộ với Drawer)
   const handleGoCategoryById = (id) => {
     if (!id) return;
     navigate(`/search?category_id=${id}`);
@@ -102,24 +98,25 @@ const Navigation = () => {
     <>
       <nav className="relative border-b border-gray-200 bg-white">
         {/* ===== Desktop ===== */}
-        <div className="container px-4 sm:px-6 hidden md:flex items-center justify-between">
-          {/* Trái: nút mở drawer danh mục tổng */}
+        <div className="container px-4 sm:px-6 hidden md:flex items-center justify-center gap-10">
+          {/* Trái: Drawer Button */}
           <Button
-            className="!text-black flex items-center gap-2 !py-3"
+            className="!text-black flex items-center gap-2 !py-2"
             onClick={openCategoryPanel}
           >
             <HiOutlineMenuAlt1 className="text-[18px]" />
-            <span className="truncate text-sm">Danh mục nội thất</span>
+            <span className="truncate text-sm">DANH MỤC NỘI THẤT</span>
           </Button>
 
-          {/* Giữa: 1 mục lớn SẢN PHẨM */}
-          <ul className="flex items-center gap-8">
+          {/* Menu giữa */}
+          <ul className="flex items-center gap-6">
+            {/* SẢN PHẨM — Normal weight */}
             <li className="relative group">
-              <button className="text-[16px] font-semibold tracking-wide hover:text-amber-700 flex items-center gap-1">
+              <button className="text-[16px] font-normal tracking-wide hover:text-amber-700 flex items-center gap-1">
                 SẢN PHẨM <span className="text-amber-600">▾</span>
               </button>
 
-              {/* Mega menu Sản phẩm */}
+              {/* Mega menu */}
               <div className="megaMenu absolute left-0 top-full w-[min(1100px,92vw)] bg-white shadow-xl border z-[60] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 p-6">
                   {PRODUCTS_COLS.map((col) => (
@@ -131,7 +128,6 @@ const Navigation = () => {
                         {col.items.map((it) => (
                           <li key={it.id}>
                             <button
-                              type="button"
                               onClick={() => handleGoCategoryById(it.id)}
                               className="text-[14px] text-gray-700 hover:text-amber-700"
                             >
@@ -145,19 +141,19 @@ const Navigation = () => {
                 </div>
               </div>
             </li>
-          </ul>
 
-          {/* Phải: giữ nguyên */}
-          <div className="hidden lg:flex items-center gap-6">
-            <Link to="/shipper/register" className="nav-link">
-              <MdDeliveryDining />
-              <span>Go Shipper</span>
-            </Link>
-            <Link to="/register-vendor" className="nav-link">
-              <Store />
-              <span>Become a Vendor</span>
-            </Link>
-          </div>
+            {/* NAV EXTRA ITEMS */}
+            {NAV_EXTRA_ITEMS.map((item) => (
+              <li key={item.label}>
+                <Link
+                  to={item.to}
+                  className="text-[15px] font-normal text-gray-800 hover:text-amber-700 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* ===== Mobile ===== */}
@@ -169,28 +165,31 @@ const Navigation = () => {
             <FaBars className="text-lg" />
           </Button>
 
-          <Button onClick={openCategoryPanel} className="flex items-center gap-1">
+          <Button
+            onClick={openCategoryPanel}
+            className="flex items-center gap-1"
+          >
             <HiOutlineMenuAlt1 className="text-lg" />
             <span className="text-xs">Danh mục</span>
           </Button>
 
           {isMobileMenuOpen && (
             <div className="mobileMenu bg-white shadow-xl border absolute left-0 top-full w-full z-[70] max-h-[70vh] overflow-auto">
-              {/* Nhóm lớn: SẢN PHẨM */}
               <details open className="border-b">
                 <summary className="py-3 px-4 text-sm font-semibold">
                   SẢN PHẨM
                 </summary>
+
                 {PRODUCTS_COLS.map((col) => (
                   <details key={col.heading} className="border-t">
                     <summary className="py-2 px-5 text-sm font-medium">
                       {col.heading}
                     </summary>
+
                     <ul className="pl-8 pb-3 space-y-2">
                       {col.items.map((it) => (
                         <li key={it.id}>
                           <button
-                            type="button"
                             onClick={() => {
                               handleGoCategoryById(it.id);
                               setIsMobileMenuOpen(false);
@@ -206,16 +205,27 @@ const Navigation = () => {
                 ))}
               </details>
 
-              <div className="flex justify-between px-4 py-3 text-sm">
-                <Link to="/shipper/register">Go Shipper</Link>
-                <Link to="/register-vendor">Become a Vendor</Link>
+              {/* NAV EXTRA — MOBILE */}
+              <div className="border-t px-4 py-3 space-y-1 text-sm">
+                {NAV_EXTRA_ITEMS.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      navigate(item.to);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left py-1 text-gray-800 font-normal hover:text-amber-700"
+                  >
+                    {item.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
         </div>
       </nav>
 
-      {/* Drawer danh mục tổng */}
+      {/* Drawer */}
       <CategoryPanel
         isOpenCatPanel={isOpenCatPanel}
         setIsOpenCatPanel={setIsOpenCatPanel}

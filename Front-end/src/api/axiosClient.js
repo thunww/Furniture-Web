@@ -1,54 +1,73 @@
 import axios from "axios";
 
-// 🔗 API_URL đến từ file .env hoặc .env.local
+// 🔗 API_URL từ .env
 const API_URL = import.meta.env.VITE_API_URL;
-
-console.log("🔗 FE đang dùng API:", API_URL);
 
 const axiosClient = axios.create({
   baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true, // FE gửi cookie refreshToken
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true, // Gửi cookie HttpOnly (access + refresh)
   timeout: 10000,
 });
 
-// ========= REQUEST =========
+// ===========================
+//   REQUEST INTERCEPTOR
+// ===========================
 axiosClient.interceptors.request.use(
   (config) => config,
   (error) => Promise.reject(error)
 );
 
-// ========= RESPONSE + REFRESH TOKEN LOGIC =========
+// ===========================
+//   REFRESH TOKEN LOGIC
+// ===========================
+
 let isRefreshing = false;
 let failedQueue = [];
 
-const processQueue = (error, data) => {
-  failedQueue.forEach((prom) => {
-    error ? prom.reject(error) : prom.resolve(data);
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((promise) => {
+    if (error) promise.reject(error);
+    else promise.resolve(token);
   });
   failedQueue = [];
 };
 
+// ===========================
+//   RESPONSE INTERCEPTOR
+// ===========================
 axiosClient.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
 
     if (!error.response) return Promise.reject(error);
 
-    // tránh loop khi refresh lỗi
+    // ❌ KHÔNG bao giờ refresh khi lỗi xảy ra ở login hoặc register
+    if (
+      originalRequest.url.includes("/auth/login") ||
+      originalRequest.url.includes("/auth/register")
+    ) {
+      return Promise.reject(error);
+    }
+
+    // ❌ Không retry chính refresh-token
     if (originalRequest.url.includes("/auth/refresh-token")) {
       return Promise.reject(error);
     }
 
-    // Kiểm tra refreshToken trong cookie
-    const hasRefresh = document.cookie.includes("refreshToken=");
-    if (!hasRefresh) return Promise.reject(error);
+    // ===============================
+    //       TOKEN HẾT HẠN
+    // ===============================
+    if (
+      error.response.status === 401 &&
+      error.response.data?.needRefresh === true && // BE báo rõ needRefresh
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
 
-    // Token hết hạn
-    if (error.response.status === 401 && !originalRequest._retry) {
+      // Nếu đã có refresh đang chạy → chờ
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -57,22 +76,25 @@ axiosClient.interceptors.response.use(
           .catch((err) => Promise.reject(err));
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
+        // refresh-token gửi cookie tự động
         await axiosClient.post("/auth/refresh-token");
+
         processQueue(null, true);
 
+        // retry lại request ban đầu
         return axiosClient(originalRequest);
-      } catch (err) {
-        processQueue(err, null);
-        return Promise.reject(err);
+      } catch (refreshErr) {
+        processQueue(refreshErr, null);
+        return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;
       }
     }
 
+    // Các lỗi khác => trả lại FE
     return Promise.reject(error);
   }
 );
