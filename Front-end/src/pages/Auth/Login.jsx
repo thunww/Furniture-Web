@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Shield, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { GoogleLogin } from "@react-oauth/google";
@@ -37,12 +37,14 @@ const Login = () => {
   const { message, error, isLoading, needCaptcha, isLocked, attempts } =
     useSelector((state) => state.auth);
 
+  const hasSubmitted = useRef(false);
+
   useEffect(() => {
     dispatch(resetMessage());
   }, [dispatch]);
 
   useEffect(() => {
-    if (message) {
+    if (message && hasSubmitted.current) {
       toast.success(message, {
         position: "top-right",
         autoClose: 2000,
@@ -50,7 +52,8 @@ const Login = () => {
       });
       setTimeout(() => navigate("/"), 2000);
     }
-    if (error) {
+
+    if (error && hasSubmitted.current) {
       toast.error(error, {
         position: "top-right",
         autoClose: 3000,
@@ -59,20 +62,13 @@ const Login = () => {
     }
   }, [message, error, navigate, dispatch]);
 
-  // 🟢 Handle Email/Password Login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    hasSubmitted.current = true;
+
     if (!email || !password) {
       toast.error("Vui lòng nhập đầy đủ thông tin!");
-      return;
-    }
-
-    // 🟡 Gợi ý mật khẩu mạnh (KHÔNG bắt buộc khi login)
-    if (!isStrongPassword(password)) {
-      toast.error(
-        "Mật khẩu nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để tăng bảo mật."
-      );
       return;
     }
 
@@ -105,11 +101,12 @@ const Login = () => {
     );
   };
 
-  // 🟢 Handle Google Login
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
+      hasSubmitted.current = true;
+
       await dispatch(loginWithGoogle(credentialResponse.credential)).unwrap();
-      toast.success("Đăng nhập Google thành công!");
+      toast.success("Đăng nhập bằng Google thành công!");
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       toast.error(err || "Đăng nhập Google thất bại");
@@ -129,7 +126,7 @@ const Login = () => {
             <div className="absolute inset-0 flex items-center justify-center">
               <img
                 src="./login.png"
-                alt="Login visual"
+                alt="Minh họa đăng nhập"
                 className="h-full w-full object-contain hover:scale-102 transition-transform duration-700"
               />
             </div>
@@ -142,10 +139,12 @@ const Login = () => {
                 <div className="bg-gradient-to-r from-stone-500 to-stone-600 p-3 rounded-full shadow-md">
                   <Lock className="text-white" size={24} />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-800 ml-3">Login</h2>
+                <h2 className="text-3xl font-bold text-gray-800 ml-3">
+                  Đăng nhập
+                </h2>
               </div>
 
-              {/* 🔴 Account locked */}
+              {/* 🔴 Tài khoản bị khóa */}
               {isLocked && (
                 <div className="mb-4 rounded-lg bg-red-50 p-4 border border-red-200">
                   <div className="flex">
@@ -160,7 +159,7 @@ const Login = () => {
                 </div>
               )}
 
-              {/* 🟡 Need CAPTCHA */}
+              {/* 🟡 Yêu cầu CAPTCHA */}
               {needCaptcha && !isLocked && (
                 <div className="mb-4 rounded-lg bg-yellow-50 p-4 border border-yellow-200">
                   <div className="flex">
@@ -177,7 +176,6 @@ const Login = () => {
                 </div>
               )}
 
-              {/* Form login */}
               <form className="space-y-5" onSubmit={handleSubmit}>
                 {/* Email */}
                 <div>
@@ -191,25 +189,26 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
-                      placeholder="Enter your email"
+                      placeholder="Nhập email của bạn"
                       disabled={isLoading || isLocked}
                     />
                   </div>
                 </div>
 
-                {/* Password */}
+                {/* Mật khẩu */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="text-gray-700 font-medium">
-                      Password
+                      Mật khẩu
                     </label>
                     <Link
                       to="/forgot-password"
                       className="text-sm text-indigo-600 hover:text-indigo-800"
                     >
-                      Forgot password?
+                      Quên mật khẩu?
                     </Link>
                   </div>
+
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
@@ -217,16 +216,18 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
-                      placeholder="Enter your password"
+                      placeholder="Nhập mật khẩu"
                       disabled={isLoading || isLocked}
                     />
                   </div>
 
-                  {/* GỢI Ý ĐỘ MẠNH MẬT KHẨU */}
                   {password && !isStrongPassword(password) && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Mật khẩu nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ
-                      thường, số và ký tự đặc biệt để tăng bảo mật.
+                    <p className="text-xs text-amber-600 mt-2 flex items-start gap-1">
+                      <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <span>
+                        Mật khẩu nên có ít nhất 8 ký tự, gồm chữ hoa, chữ
+                        thường, số và ký tự đặc biệt.
+                      </span>
                     </p>
                   )}
                 </div>
@@ -245,11 +246,11 @@ const Login = () => {
                     htmlFor="remember-me"
                     className="ml-2 text-sm text-gray-700"
                   >
-                    Remember me
+                    Ghi nhớ đăng nhập
                   </label>
                 </div>
 
-                {/* Submit */}
+                {/* Nút đăng nhập */}
                 <button
                   type="submit"
                   className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-stone-500 to-stone-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 transition"
@@ -264,13 +265,12 @@ const Login = () => {
                     </span>
                   ) : (
                     <>
-                      Login <ArrowRight className="ml-2 h-5 w-5" />
+                      Đăng nhập <ArrowRight className="ml-2 h-5 w-5" />
                     </>
                   )}
                 </button>
               </form>
 
-              {/* reCAPTCHA warning */}
               {(needCaptcha || attempts >= 3) && !isLocked && (
                 <div className="mt-4 text-xs text-center text-gray-500">
                   Trang này được bảo vệ bởi reCAPTCHA.
@@ -284,7 +284,7 @@ const Login = () => {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-gradient-to-r from-white to-blue-50 text-gray-500">
-                    Or continue with
+                    Hoặc tiếp tục với
                   </span>
                 </div>
               </div>
@@ -304,12 +304,12 @@ const Login = () => {
               </div>
 
               <p className="text-center text-gray-600">
-                Don't have an account?{" "}
+                Chưa có tài khoản?{" "}
                 <Link
                   to="/register"
                   className="text-indigo-600 font-medium hover:underline"
                 >
-                  Sign up now
+                  Đăng ký ngay
                 </Link>
               </p>
             </div>

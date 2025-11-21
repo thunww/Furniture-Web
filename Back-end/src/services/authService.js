@@ -8,6 +8,11 @@ const {
   sendResetPasswordEmail,
 } = require("../utils/sendEmail");
 const { verifyCaptcha } = require("../utils/captchaHelper");
+const {
+  validatePassword,
+  containsPersonalInfo,
+  isCommonPassword,
+} = require("../utils/passwordValidator");
 const { OAuth2Client } = require("google-auth-library");
 const { Op } = require("sequelize");
 
@@ -23,6 +28,26 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const registerUser = async (username, email, password) => {
   if (!username || !email || !password)
     throw new Error("Thiếu thông tin đăng ký");
+
+  // ✅ VALIDATE PASSWORD STRENGTH
+  const passwordValidation = validatePassword(password);
+  if (!passwordValidation.isValid) {
+    throw new Error(passwordValidation.message);
+  }
+
+  // ✅ KIỂM TRA MẬT KHẨU CHỨA THÔNG TIN CÁ NHÂN
+  if (containsPersonalInfo(password, email, username)) {
+    throw new Error(
+      "Mật khẩu không được chứa email hoặc tên người dùng của bạn."
+    );
+  }
+
+  // ✅ KIỂM TRA MẬT KHẨU PHỔ BIẾN
+  if (isCommonPassword(password)) {
+    throw new Error(
+      "Mật khẩu này quá phổ biến và dễ bị tấn công. Vui lòng chọn mật khẩu khác."
+    );
+  }
 
   // 🔍 Kiểm tra email đã tồn tại chưa
   const existingUser = await User.findOne({ where: { email } });
@@ -390,8 +415,10 @@ const resetPassword = async (token, newPassword) => {
     throw new Error("Mật khẩu mới không được để trống.");
   }
 
-  if (newPassword.length < 6) {
-    throw new Error("Mật khẩu phải có ít nhất 6 ký tự.");
+  // ✅ VALIDATE PASSWORD STRENGTH
+  const passwordValidation = validatePassword(newPassword);
+  if (!passwordValidation.isValid) {
+    throw new Error(passwordValidation.message);
   }
 
   // ✅ Verify token
@@ -407,7 +434,6 @@ const resetPassword = async (token, newPassword) => {
     throw new Error("Token không hợp lệ.");
   }
 
-  // ✅ FIX: Dùng user_id thay vì userId
   const userId = decoded.user_id;
 
   if (!userId) {
@@ -424,6 +450,20 @@ const resetPassword = async (token, newPassword) => {
   // ✅ Check if account is banned
   if (user.status === "banned") {
     throw new Error("Tài khoản bị khóa. Vui lòng liên hệ hỗ trợ.");
+  }
+
+  // ✅ KIỂM TRA MẬT KHẨU CHỨA THÔNG TIN CÁ NHÂN
+  if (containsPersonalInfo(newPassword, user.email, user.username)) {
+    throw new Error(
+      "Mật khẩu không được chứa email hoặc tên người dùng của bạn."
+    );
+  }
+
+  // ✅ KIỂM TRA MẬT KHẨU PHỔ BIẾN
+  if (isCommonPassword(newPassword)) {
+    throw new Error(
+      "Mật khẩu này quá phổ biến và dễ bị tấn công. Vui lòng chọn mật khẩu khác."
+    );
   }
 
   // ✅ Hash and save new password
@@ -480,25 +520,6 @@ const logoutUser = async (userId) => {
   return { message: "Logout successful" };
 };
 
-const getUserProfile = async (userId) => {
-  const user = await User.findOne({
-    where: { user_id: userId },
-    attributes: ["user_id", "username", "email", "status", "is_verified"],
-  });
-
-  if (!user) throw new Error("User not found");
-
-  const userRoles = await UserRole.findAll({ where: { user_id: userId } });
-  const roleIds = userRoles.map((ur) => ur.role_id);
-  const roles = await Role.findAll({ where: { role_id: roleIds } });
-  const roleNames = roles.map((r) => r.role_name);
-
-  return {
-    ...user.dataValues,
-    roles: roleNames,
-  };
-};
-
 module.exports = {
   registerUser,
   loginUser,
@@ -507,5 +528,4 @@ module.exports = {
   logoutUser,
   forgotPassword,
   resetPassword,
-  getUserProfile,
 };
