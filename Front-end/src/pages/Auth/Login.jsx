@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ArrowRight, Shield, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { GoogleLogin } from "@react-oauth/google";
@@ -20,12 +20,14 @@ const Login = () => {
   const { message, error, isLoading, needCaptcha, isLocked, attempts } =
     useSelector((state) => state.auth);
 
+  const hasSubmitted = useRef(false);
+
   useEffect(() => {
     dispatch(resetMessage());
   }, [dispatch]);
 
   useEffect(() => {
-    if (message) {
+    if (message && hasSubmitted.current) {
       toast.success(message, {
         position: "top-right",
         autoClose: 2000,
@@ -35,7 +37,8 @@ const Login = () => {
         navigate("/");
       }, 2000);
     }
-    if (error) {
+
+    if (error && hasSubmitted.current) {
       toast.error(error, {
         position: "top-right",
         autoClose: 3000,
@@ -44,12 +47,13 @@ const Login = () => {
     }
   }, [message, error, navigate, dispatch]);
 
-  // 🟢 Handle Email/Password Login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    hasSubmitted.current = true;
+
     if (!email || !password) {
-      toast.error("Vui lòng nhập đầy đủ thông tin!", { position: "top-right" });
+      toast.error("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
 
@@ -82,14 +86,13 @@ const Login = () => {
     );
   };
 
-  // 🟢 Handle Google Login
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
+      hasSubmitted.current = true;
+
       await dispatch(loginWithGoogle(credentialResponse.credential)).unwrap();
-      toast.success("Đăng nhập Google thành công!");
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
+      toast.success("Đăng nhập bằng Google thành công!");
+      setTimeout(() => navigate("/"), 1500);
     } catch (err) {
       toast.error(err || "Đăng nhập Google thất bại");
     }
@@ -108,7 +111,7 @@ const Login = () => {
             <div className="absolute inset-0 flex items-center justify-center">
               <img
                 src="./login.png"
-                alt="Login visual"
+                alt="Minh họa đăng nhập"
                 className="h-full w-full object-contain hover:scale-102 transition-transform duration-700"
               />
             </div>
@@ -121,7 +124,9 @@ const Login = () => {
                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-3 rounded-full shadow-md">
                   <Lock className="text-white" size={24} />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-800 ml-3">Login</h2>
+                <h2 className="text-3xl font-bold text-gray-800 ml-3">
+                  Đăng nhập
+                </h2>
               </div>
 
               {/* 🔴 Tài khoản bị khóa */}
@@ -139,7 +144,7 @@ const Login = () => {
                 </div>
               )}
 
-              {/* 🟡 Cảnh báo cần CAPTCHA */}
+              {/* 🟡 Yêu cầu CAPTCHA */}
               {needCaptcha && !isLocked && (
                 <div className="mb-4 rounded-lg bg-yellow-50 p-4 border border-yellow-200">
                   <div className="flex">
@@ -156,7 +161,6 @@ const Login = () => {
                 </div>
               )}
 
-              {/* Form login */}
               <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-gray-700 font-medium mb-1">
@@ -168,33 +172,35 @@ const Login = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm disabled:bg-gray-100"
-                      placeholder="Enter your email"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
+                      placeholder="Nhập email của bạn"
                       disabled={isLoading || isLocked}
                     />
                   </div>
                 </div>
 
+                {/* Mật khẩu */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
-                    <label className="block text-gray-700 font-medium">
-                      Password
+                    <label className="text-gray-700 font-medium">
+                      Mật khẩu
                     </label>
                     <Link
                       to="/forgot-password"
                       className="text-sm text-indigo-600 hover:text-indigo-800"
                     >
-                      Forgot password?
+                      Quên mật khẩu?
                     </Link>
                   </div>
+
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-5 w-5 text-indigo-400" />
                     <input
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none bg-white shadow-sm disabled:bg-gray-100"
-                      placeholder="Enter your password"
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
+                      placeholder="Nhập mật khẩu"
                       disabled={isLoading || isLocked}
                     />
                   </div>
@@ -215,10 +221,11 @@ const Login = () => {
                     htmlFor="remember-me"
                     className="ml-2 text-sm text-gray-700"
                   >
-                    Remember me
+                    Ghi nhớ đăng nhập
                   </label>
                 </div>
 
+                {/* Nút đăng nhập */}
                 <button
                   type="submit"
                   className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
@@ -233,14 +240,12 @@ const Login = () => {
                     </span>
                   ) : (
                     <>
-                      Login
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      Đăng nhập <ArrowRight className="ml-2 h-5 w-5" />
                     </>
                   )}
                 </button>
               </form>
 
-              {/* reCAPTCHA notice */}
               {(needCaptcha || attempts >= 3) && !isLocked && (
                 <div className="mt-4 text-xs text-center text-gray-500">
                   <p>
@@ -274,7 +279,7 @@ const Login = () => {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="px-2 bg-gradient-to-r from-white to-blue-50 text-gray-500">
-                    Or continue with
+                    Hoặc tiếp tục với
                   </span>
                 </div>
               </div>
@@ -294,12 +299,12 @@ const Login = () => {
               </div>
 
               <p className="text-center text-gray-600">
-                Don't have an account?{" "}
+                Chưa có tài khoản?{" "}
                 <Link
                   to="/register"
                   className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline transition duration-150"
                 >
-                  Sign up now
+                  Đăng ký ngay
                 </Link>
               </p>
             </div>

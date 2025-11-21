@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Lock, ArrowRight, Loader2, CheckCircle, XCircle } from "lucide-react";
+import {
+  Lock,
+  ArrowRight,
+  Loader2,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import authService from "../../services/authService";
 import "react-toastify/dist/ReactToastify.css";
@@ -56,14 +63,7 @@ const ResetPassword = () => {
       return;
     }
 
-    // Strong password check
-    if (!isStrongPassword(newPassword)) {
-      toast.error(
-        "Mật khẩu mới nên dài tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để tăng bảo mật."
-      );
-      return;
-    }
-
+    // ✅ BỎ: Kiểm tra mật khẩu mạnh (đã có cảnh báo inline + backend validate)
     // Confirm password match
     if (newPassword !== confirmPassword) {
       toast.error("Mật khẩu xác nhận không khớp!");
@@ -151,18 +151,18 @@ const ResetPassword = () => {
     <div className="flex justify-center items-center h-full p-8 bg-gradient-to-br from-blue-50 to-purple-100">
       <div className="w-full max-w-6xl overflow-hidden rounded-3xl shadow-lg border border-gray-100 bg-white bg-opacity-90 backdrop-blur-md">
         <div className="flex flex-wrap">
-          {/* Left Image */}
+          {/* Hình minh họa */}
           <div className="hidden md:block w-1/2 relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <img
                 src="./login.png"
-                alt="Reset password visual"
+                alt="Đặt lại mật khẩu"
                 className="h-full w-full object-contain hover:scale-102 transition-transform duration-700"
               />
             </div>
           </div>
 
-          {/* Right Form */}
+          {/* Form */}
           <div className="w-full md:w-1/2 bg-white p-8 bg-gradient-to-br from-white to-blue-50">
             <div className="max-w-md mx-auto">
               <div className="flex items-center mb-8">
@@ -179,7 +179,7 @@ const ResetPassword = () => {
               </p>
 
               <form className="space-y-5" onSubmit={handleSubmit}>
-                {/* New Password */}
+                {/* Mật khẩu mới */}
                 <div>
                   <label className="block text-gray-700 font-medium mb-1">
                     Mật khẩu mới
@@ -196,16 +196,19 @@ const ResetPassword = () => {
                     />
                   </div>
 
-                  {/* GỢI Ý MẬT KHẨU MẠNH */}
+                  {/* ✅ CẢNH BÁO INLINE - Màu amber */}
                   {newPassword && !isStrongPassword(newPassword) && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Mật khẩu mới nên dài tối thiểu 8 ký tự, bao gồm chữ hoa,
-                      chữ thường, số và ký tự đặc biệt để tăng bảo mật.
+                    <p className="text-xs text-amber-600 mt-2 flex items-start gap-1">
+                      <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <span>
+                        Mật khẩu nên có ít nhất 8 ký tự, bao gồm chữ hoa, chữ
+                        thường, số và ký tự đặc biệt để tăng bảo mật.
+                      </span>
                     </p>
                   )}
                 </div>
 
-                {/* Confirm Password */}
+                {/* Xác nhận mật khẩu */}
                 <div>
                   <label className="block text-gray-700 font-medium mb-1">
                     Xác nhận mật khẩu
@@ -222,9 +225,13 @@ const ResetPassword = () => {
                     />
                   </div>
 
+                  {/* ✅ CẢNH BÁO INLINE - Màu red */}
                   {confirmPassword && confirmPassword !== newPassword && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Mật khẩu xác nhận phải giống với mật khẩu mới.
+                    <p className="text-xs text-red-600 mt-2 flex items-start gap-1">
+                      <AlertCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <span>
+                        Mật khẩu xác nhận phải giống với mật khẩu mới.
+                      </span>
                     </p>
                   )}
                 </div>

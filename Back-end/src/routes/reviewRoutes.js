@@ -1,39 +1,48 @@
 const express = require("express");
 const router = express.Router();
+
 const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
+const isReviewOwner = require("../middleware/isReviewOwner");
+
 const reviewController = require("../controllers/reviewController");
 const upload = require("../middleware/uploadMiddleware");
 
-// Lấy đánh giá theo ID (công khai)
+// 🔓 Public API
 router.get("/by-id/:id", reviewController.getReviewById);
-
-// Lấy danh sách đánh giá theo sản phẩm (công khai)
 router.get("/:product_id", reviewController.getReviewsByProductId);
 
-// Áp dụng authMiddleware cho các route yêu cầu đăng nhập
+// 🔐 Private API
 router.use(authMiddleware);
 
-// Lấy tất cả đánh giá (dành cho admin)
-router.get("/admin/all", reviewController.getAllReviews);
+// Admin xem toàn bộ review
+router.get(
+  "/admin/all",
+  roleMiddleware(["admin"]),
+  reviewController.getAllReviews
+);
 
-// Lấy đánh giá của người dùng hiện tại
+// User xem review của mình
 router.get("/user/all", reviewController.getReviewsByUser);
 
-// Tạo đánh giá mới cho sản phẩm
+// Tạo review
 router.post(
   "/products/:id",
   upload.single("image"),
   reviewController.createReview
-
 );
 
-// Cập nhật nội dung đánh giá (rating, comment, images)
-router.put("/:id", reviewController.updateReview);
+// ⭐ Sửa review — chỉ chủ review được sửa
+router.put("/:id", isReviewOwner, reviewController.updateReview);
 
-// Cập nhật trạng thái xác minh của đánh giá (is_verified, dành cho admin)
-router.put("/:id/status", reviewController.updateReviewStatus);
+// ⭐ Xóa review — chỉ chủ review được xóa
+router.delete("/:id", isReviewOwner, reviewController.deleteReview);
 
-// Xóa đánh giá
-router.delete("/:id", reviewController.deleteReview);
+// ⭐ Admin confirm review
+router.put(
+  "/:id/status",
+  roleMiddleware(["admin"]),
+  reviewController.updateReviewStatus
+);
 
 module.exports = router;
