@@ -12,6 +12,8 @@ const {
 
 router.get("/", productController.getAllProducts);
 
+
+
 // Route xóa hình ảnh sản phẩm
 router.delete(
   "/image/:image_id",

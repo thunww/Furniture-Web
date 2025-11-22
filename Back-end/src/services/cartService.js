@@ -73,10 +73,13 @@ class CartService {
         return this.getCartWithItems(user_id);
     }
 
-    async updateCartItem(cart_item_id, quantity) {
+    async updateCartItem(cart_item_id, quantity,user_id) {
         if (!cart_item_id || quantity <= 0) throw new Error('Thông tin không hợp lệ');
-        const cartItem = await CartItem.findByPk(cart_item_id);
-        if (!cartItem) throw new Error('Không tìm thấy sản phẩm');
+         const cartItem = await CartItem.findOne({
+    where: { cart_item_id },
+    include: [{ model: Cart, as: 'cart', where: { user_id } }],
+  });
+  if (!cartItem) throw new Error('Cart item not found or not owned by user');
 
         const product = await Product.findByPk(cartItem.product_id, {
             include: [{ model: Shop, as: 'Shop', attributes: ['shop_id', 'shop_name', 'logo'] }]
@@ -99,17 +102,18 @@ class CartService {
         return this.getCartWithItems(cart.user_id);
     }
 
-    async removeFromCart(cart_item_id) {
-        const cartItem = await CartItem.findByPk(cart_item_id);
-        if (!cartItem) throw new Error('Không tìm thấy sản phẩm');
-
-        const cart_id = cartItem.cart_id;
-        await cartItem.destroy();
-        await this.updateCartTotals(cart_id);
-
-        const cart = await Cart.findByPk(cart_id);
-        return this.getCartWithItems(cart.user_id);
-    }
+    async removeFromCart(cart_item_id,user_id) {
+  const cartItem = await CartItem.findOne({
+    where: { cart_item_id },
+    include: [{ model: Cart, as: 'cart', where: { user_id } }],
+  });
+  if (!cartItem) throw new Error('Cart item not found or not owned by user');
+  const cart_id = cartItem.cart_id;
+  await cartItem.destroy();
+  await this.updateCartTotals(cart_id);
+  const cart = await Cart.findByPk(cart_id);
+  return this.getCartWithItems(cart.user_id);
+}
 
     async getCartWithItems(user_id) {
         const cart = await Cart.findOne({

@@ -50,6 +50,7 @@ class CartController {
     updateCartItem = async (req, res) => {
         try {
             const cart_item_id = req.params.id;
+            const user_id = req.user.id || req.user.user_id;
             const { quantity } = req.body;
 
             if (!quantity || quantity <= 0) {
@@ -59,7 +60,7 @@ class CartController {
                 });
             }
 
-            const cartData = await cartService.updateCartItem(cart_item_id, quantity);
+            const cartData = await cartService.updateCartItem(cart_item_id, quantity, user_id);
 
             return res.status(200).json(cartData);
         } catch (error) {
@@ -74,7 +75,8 @@ class CartController {
     removeFromCart = async (req, res) => {
         try {
             const cart_item_id = req.params.id;
-            const cartData = await cartService.removeFromCart(cart_item_id);
+            const user_id = req.user.id || req.user.user_id;
+            const cartData = await cartService.removeFromCart(cart_item_id,user_id);
 
             return res.status(200).json(cartData);
         } catch (error) {

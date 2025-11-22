@@ -1,12 +1,12 @@
 import axios from "axios";
 
-// 🔗 API_URL từ .env
+// API base URL từ .env
 const API_URL = import.meta.env.VITE_API_URL;
 
 const axiosClient = axios.create({
   baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
-  withCredentials: true, // Gửi cookie HttpOnly (access + refresh)
+  withCredentials: true, // gửi cookie HttpOnly (access + refresh)
   timeout: 10000,
 });
 
@@ -44,7 +44,20 @@ axiosClient.interceptors.response.use(
 
     if (!error.response) return Promise.reject(error);
 
-    // ❌ KHÔNG bao giờ refresh khi lỗi xảy ra ở login hoặc register
+    // Handle banned account: clear session and redirect to login
+    if (error.response.status === 403 && error.response.data?.banned) {
+      try {
+        await axiosClient.post("/auth/logout"); // yêu cầu BE clear cookie HttpOnly
+      } catch (_) {
+        // ignore logout failure để tránh vòng lặp
+      }
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login?banned=1";
+      }
+      return Promise.reject(error);
+    }
+
+    // Không bao giờ refresh khi lỗi xảy ra ở login/register
     if (
       originalRequest.url.includes("/auth/login") ||
       originalRequest.url.includes("/auth/register")
@@ -52,7 +65,7 @@ axiosClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // ❌ Không retry chính refresh-token
+    // Không retry chính refresh-token
     if (originalRequest.url.includes("/auth/refresh-token")) {
       return Promise.reject(error);
     }
@@ -62,12 +75,12 @@ axiosClient.interceptors.response.use(
     // ===============================
     if (
       error.response.status === 401 &&
-      error.response.data?.needRefresh === true && // BE báo rõ needRefresh
+      error.response.data?.needRefresh === true && // BE báo cần refresh
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
 
-      // Nếu đã có refresh đang chạy → chờ
+      // Nếu đã có refresh đang chạy thì chờ
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -79,7 +92,7 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // refresh-token gửi cookie tự động
+        // refresh-token gửi cookie từ trình duyệt
         await axiosClient.post("/auth/refresh-token");
 
         processQueue(null, true);
@@ -94,7 +107,7 @@ axiosClient.interceptors.response.use(
       }
     }
 
-    // Các lỗi khác => trả lại FE
+    // Các lỗi khác => trả về FE
     return Promise.reject(error);
   }
 );

@@ -15,6 +15,7 @@ const {
 } = require("../utils/passwordValidator");
 const { OAuth2Client } = require("google-auth-library");
 const { Op } = require("sequelize");
+const { hash } = require("crypto");
 
 // ========================== CONFIG ==========================
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -254,8 +255,9 @@ const loginUser = async (
     { user_id: user.user_id, type: "refresh" },
     refreshTokenExpiry
   );
+  const hashRefreshToken = await hashPassword(refreshToken);
 
-  await user.update({ refresh_token: refreshToken });
+  await user.update({ refresh_token: hashRefreshToken });
 
   return {
     message: "Đăng nhập thành công.",
@@ -354,10 +356,11 @@ const loginWithGoogle = async (googleToken) => {
 
     const refreshToken = generateToken(
       { user_id: user.user_id, type: "refresh" },
-      "30d"
+      "7d"
     );
+    hashRefreshToken= await hashPassword(refreshToken);
 
-    await user.update({ refresh_token: refreshToken });
+    await user.update({ refresh_token: hashRefreshToken });
 
     return {
       message: "Đăng nhập Google thành công.",
@@ -502,6 +505,11 @@ const refreshAccessToken = async (refreshToken) => {
   if (!user) throw new Error("User not found");
   if (user.status === "banned") throw new Error("User account banned");
 
+  // NEW: so khớp với giá trị lưu trong DB
+  if (!user.refresh_token || await comparePassword(refreshToken, user.refresh_token) === false) {
+    throw new Error("Refresh token revoked");
+  }
+
   const userRoles = await UserRole.findAll({
     where: { user_id: user.user_id },
   });
@@ -517,8 +525,9 @@ const refreshAccessToken = async (refreshToken) => {
     { user_id: user.user_id, type: "refresh" },
     "7d"
   );
+  hashRefreshToken = await hashPassword(newRefreshToken);
 
-  await user.update({ refresh_token: newRefreshToken });
+  await user.update({ refresh_token: hashRefreshToken });
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };
 

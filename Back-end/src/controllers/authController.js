@@ -115,7 +115,7 @@ const handleGoogleLogin = async (req, res) => {
     });
 
     return res.status(200).json({
-      message: "Google login successful",
+      console: "Google login successful",
       user,
     });
   } catch (error) {
