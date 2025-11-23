@@ -33,9 +33,7 @@ const Login = () => {
         autoClose: 2000,
         onClose: () => dispatch(resetMessage()),
       });
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
+      setTimeout(() => navigate("/"), 2000);
     }
 
     if (error && hasSubmitted.current) {
@@ -49,7 +47,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     hasSubmitted.current = true;
 
     if (!email || !password) {
@@ -89,7 +86,6 @@ const Login = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       hasSubmitted.current = true;
-
       await dispatch(loginWithGoogle(credentialResponse.credential)).unwrap();
       toast.success("Đăng nhập bằng Google thành công!");
       setTimeout(() => navigate("/"), 1500);
@@ -106,7 +102,7 @@ const Login = () => {
     <div className="flex justify-center items-center h-full p-8 bg-gradient-to-br from-blue-50 to-purple-100">
       <div className="w-full max-w-6xl overflow-hidden rounded-3xl shadow-lg border border-gray-100 bg-white bg-opacity-90 backdrop-blur-md">
         <div className="flex flex-wrap">
-          {/* Hình minh họa bên trái */}
+          {/* Hình minh họa */}
           <div className="hidden md:block w-1/2 relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <img
@@ -117,11 +113,11 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Form đăng nhập */}
+          {/* Form */}
           <div className="w-full md:w-1/2 bg-white p-8 bg-gradient-to-br from-white to-blue-50">
             <div className="max-w-md mx-auto">
               <div className="flex items-center mb-8">
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 p-3 rounded-full shadow-md">
+                <div className="bg-gradient-to-r from-stone-500 to-stone-600 p-3 rounded-full shadow-md">
                   <Lock className="text-white" size={24} />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-800 ml-3">
@@ -129,7 +125,7 @@ const Login = () => {
                 </h2>
               </div>
 
-              {/* 🔴 Tài khoản bị khóa */}
+              {/* Tài khoản bị khóa */}
               {isLocked && (
                 <div className="mb-4 rounded-lg bg-red-50 p-4 border border-red-200">
                   <div className="flex">
@@ -144,7 +140,7 @@ const Login = () => {
                 </div>
               )}
 
-              {/* 🟡 Yêu cầu CAPTCHA */}
+              {/* CAPTCHA yêu cầu */}
               {needCaptcha && !isLocked && (
                 <div className="mb-4 rounded-lg bg-yellow-50 p-4 border border-yellow-200">
                   <div className="flex">
@@ -154,7 +150,7 @@ const Login = () => {
                         Yêu cầu xác minh bảo mật
                       </h3>
                       <p className="mt-1 text-sm text-yellow-700">
-                        Vui lòng hoàn thành xác minh CAPTCHA để tiếp tục.
+                        Vui lòng hoàn thành CAPTCHA để tiếp tục.
                       </p>
                     </div>
                   </div>
@@ -172,14 +168,13 @@ const Login = () => {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
-                      placeholder="Nhập email của bạn"
                       disabled={isLoading || isLocked}
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                      placeholder="Nhập email"
                     />
                   </div>
                 </div>
 
-                {/* Mật khẩu */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="text-gray-700 font-medium">
@@ -199,23 +194,21 @@ const Login = () => {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none"
-                      placeholder="Nhập mật khẩu"
                       disabled={isLoading || isLocked}
+                      className="w-full pl-10 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400"
+                      placeholder="Nhập mật khẩu"
                     />
                   </div>
                 </div>
 
-                {/* Remember Me */}
                 <div className="flex items-center">
                   <input
                     id="remember-me"
-                    name="remember-me"
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                     disabled={isLocked}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:cursor-not-allowed"
+                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
                   />
                   <label
                     htmlFor="remember-me"
@@ -225,11 +218,10 @@ const Login = () => {
                   </label>
                 </div>
 
-                {/* Nút đăng nhập */}
                 <button
                   type="submit"
-                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading || isExecutingCaptcha || isLocked}
+                  className="w-full py-3 px-4 flex items-center justify-center bg-gradient-to-r from-stone-500 to-stone-600 text-white font-semibold rounded-lg hover:from-stone-600 hover:to-stone-700 transition duration-300 shadow-md disabled:opacity-50"
                 >
                   {isLoading || isExecutingCaptcha ? (
                     <span className="flex items-center gap-2">
@@ -249,30 +241,26 @@ const Login = () => {
               {(needCaptcha || attempts >= 3) && !isLocked && (
                 <div className="mt-4 text-xs text-center text-gray-500">
                   <p>
-                    Trang này được bảo vệ bởi reCAPTCHA và tuân theo{" "}
+                    Trang này được bảo vệ bởi reCAPTCHA •{" "}
                     <a
+                      className="text-indigo-600"
                       href="https://policies.google.com/privacy"
                       target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 hover:underline"
                     >
-                      Chính sách Bảo mật
+                      Chính sách
                     </a>{" "}
-                    và{" "}
+                    •{" "}
                     <a
+                      className="text-indigo-600"
                       href="https://policies.google.com/terms"
                       target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 hover:underline"
                     >
-                      Điều khoản Dịch vụ
-                    </a>{" "}
-                    của Google.
+                      Điều khoản
+                    </a>
                   </p>
                 </div>
               )}
 
-              {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
@@ -284,7 +272,6 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Google Login Button */}
               <div className="flex justify-center mb-6">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
@@ -302,7 +289,7 @@ const Login = () => {
                 Chưa có tài khoản?{" "}
                 <Link
                   to="/register"
-                  className="text-indigo-600 font-medium hover:text-indigo-800 hover:underline transition duration-150"
+                  className="text-indigo-600 font-medium hover:underline"
                 >
                   Đăng ký ngay
                 </Link>

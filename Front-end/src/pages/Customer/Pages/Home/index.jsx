@@ -145,7 +145,7 @@ const Home = () => {
               <div className="w-1/2 md:w-full">
                 <BannerBoxV2
                   info="right"
-                  image="https://demos.codezeel.com/prestashop/PRS21/PRS210502/img/cms/sub-banner-2.jpg"
+                  image="https://nhaxinh.com/wp-content/uploads/2021/10/Rectangle.jpeg"
                   title="Ghế bar Monaco"
                   price="$129.00"
                 />
