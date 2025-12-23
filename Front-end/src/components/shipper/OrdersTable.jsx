@@ -3,6 +3,15 @@ import axiosClient from "../../api/axiosClient";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 
+// Get base URL for images (remove /api/v1 if present)
+const getImageBaseUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || "";
+  // Remove /api/v1 suffix if present for image URLs
+  return apiUrl.replace(/\/api\/v1\/?$/, "") || "http://localhost:8080";
+};
+
+const IMAGE_BASE_URL = getImageBaseUrl();
+
 const OrdersTable = ({ orders, onOrderUpdate }) => {
   const [activeTab, setActiveTab] = useState("active");
 
@@ -191,9 +200,9 @@ const OrdersTable = ({ orders, onOrderUpdate }) => {
                           src={
                             order.customerAvatar.startsWith("http")
                               ? order.customerAvatar
-                              : `http://localhost:8080${order.customerAvatar}`
+                              : `${IMAGE_BASE_URL}${order.customerAvatar}`
                           }
-                          alt={order.customerName}
+                          alt={order.customerName || "Customer"}
                           className="h-full w-full object-cover"
                           onError={(e) => {
                             e.target.onerror = null;

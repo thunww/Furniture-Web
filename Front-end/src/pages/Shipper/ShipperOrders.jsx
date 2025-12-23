@@ -1,93 +1,174 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import OrdersTable from "../../components/shipper/OrdersTable";
 import { FaSearch } from "react-icons/fa";
 import axiosClient from "../../api/axiosClient";
 import { toast } from "react-toastify";
+
+/* =======================
+   CONSTANTS
+======================= */
+
+const STATUS_MAP = {
+  processing: "Đang xử lý",
+  shipped: "Đang giao hàng",
+  delivered: "Đã hoàn thành",
+  cancelled: "Đã hủy",
+};
+
+const MAX_SEARCH_LENGTH = 50;
+
+// Chỉ log errors trong development
+const safeLogError = (message, error) => {
+  if (import.meta.env.DEV) {
+    console.error(message, error);
+  }
+};
+
+/* =======================
+   HELPERS
+======================= */
+
+const formatAddress = (addr) => {
+  if (!addr || typeof addr !== "object") return "Không xác định";
+  
+  return [
+    addr.address_line,
+    addr.city,
+    addr.province,
+    addr.postal_code,
+  ]
+    .filter(Boolean)
+    .join(", ");
+};
+
+const safeCurrency = (value) => {
+  const num = Number(value || 0);
+  if (isNaN(num)) return "0 ₫";
+  
+  return num.toLocaleString("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  });
+};
+
+const safeDate = (date) => {
+  if (!date) return "Không xác định";
+  
+  try {
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) return "Không xác định";
+    return dateObj.toLocaleString("vi-VN");
+  } catch {
+    return "Không xác định";
+  }
+};
+
+const validateOrderData = (order) => {
+  if (!order || typeof order !== "object") return null;
+  
+  // Validate required fields
+  if (!order.sub_order_id) return null;
+  
+  return order;
+};
+
+const transformOrder = (order = {}) => {
+  const validatedOrder = validateOrderData(order);
+  if (!validatedOrder) {
+    safeLogError("Invalid order data:", order);
+    return null;
+  }
+
+  const user = validatedOrder.Order?.User || {};
+  const fullName =
+    user.first_name && user.last_name
+      ? `${String(user.first_name)} ${String(user.last_name)}`
+      : "Không xác định";
+
+  return {
+    id: String(validatedOrder.sub_order_id || ""),
+    customerName: fullName,
+    customerPhone: user.phone ? String(user.phone) : "Không có SĐT",
+    customerEmail: user.email ? String(user.email) : "",
+    customerAvatar: user.profile_picture ? String(user.profile_picture) : null,
+    address: formatAddress(validatedOrder.Order?.shipping_address),
+    time: safeDate(validatedOrder.created_at),
+    deliveredTime:
+      validatedOrder.status === "delivered"
+        ? safeDate(validatedOrder.shipment?.actual_delivery_date)
+        : null,
+    total: safeCurrency(validatedOrder.total_price),
+    status: STATUS_MAP[validatedOrder.status] || "Không xác định",
+    rawStatus: validatedOrder.status,
+    sub_order_id: validatedOrder.sub_order_id,
+    shipment: validatedOrder.shipment || null,
+  };
+};
+
+/* =======================
+   COMPONENT
+======================= */
 
 const ShipperOrders = () => {
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchOrders = async () => {
+  const fetchOrders = React.useCallback(async (signal = null) => {
     try {
       setIsLoading(true);
 
-      const response = await axiosClient.get("/shippers/sub_orders");
-      const allOrders = response.data.data || [];
+      const config = signal ? { signal } : {};
+      const res = await axiosClient.get("/shippers/sub_orders", config);
 
-      const transformedOrders = allOrders.map((order) => {
-        const formatAddress = (addressObj) => {
-          if (!addressObj) return "Không xác định";
-          const parts = [
-            addressObj.address_line,
-            addressObj.city,
-            addressObj.province,
-            addressObj.postal_code,
-          ].filter(Boolean);
-          return parts.join(", ");
-        };
+      if (!res.data || !Array.isArray(res.data?.data)) {
+        throw new Error("INVALID_RESPONSE");
+      }
 
-        const user = order.Order?.User || {};
-        const fullName =
-          user.first_name && user.last_name
-            ? `${user.first_name} ${user.last_name}`
-            : "Không xác định";
-
-        return {
-          id: order.sub_order_id?.toString() || "Không xác định",
-          customerName: fullName,
-          customerPhone: user.phone || "Không có SĐT",
-          customerEmail: user.email || "",
-          customerAvatar: user.profile_picture || null,
-          address: formatAddress(order.Order?.shipping_address),
-          time: order.created_at
-            ? new Date(order.created_at).toLocaleString()
-            : "Không xác định",
-          deliveredTime:
-            order.status === "delivered" && order.shipment?.actual_delivery_date
-              ? new Date(order.shipment.actual_delivery_date).toLocaleString()
-              : null,
-          total: parseFloat(order.total_price || 0).toLocaleString("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          }),
-          status:
-            order.status === "processing"
-              ? "Đang xử lý"
-              : order.status === "shipped"
-              ? "Đang giao hàng"
-              : order.status === "delivered"
-              ? "Đã hoàn thành"
-              : order.status === "cancelled"
-              ? "Đã hủy"
-              : "Không xác định",
-          rawStatus: order.status,
-          sub_order_id: order.sub_order_id,
-          shipment: order.shipment,
-        };
-      });
+      const transformedOrders = res.data.data
+        .map(transformOrder)
+        .filter(Boolean); // Remove null values from invalid orders
 
       setOrders(transformedOrders);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      if (error.response?.status === 401) {
-        toast.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
+    } catch (err) {
+      if (err.name === "AbortError" || err.name === "CanceledError") {
+        return; // Request was cancelled, ignore
+      }
+
+      safeLogError("Error fetching orders:", err);
+
+      if (err.response?.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn");
       } else {
         toast.error("Không thể tải danh sách đơn hàng");
       }
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchOrders();
   }, []);
 
-  const filteredOrders = orders.filter((order) =>
-    order.id?.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchOrders(controller.signal);
+
+    return () => {
+      controller.abort();
+    };
+  }, [fetchOrders]);
+
+  /* ===== Sanitized search ===== */
+  const sanitizedSearch = useMemo(
+    () => searchTerm.slice(0, MAX_SEARCH_LENGTH).toLowerCase().trim(),
+    [searchTerm]
   );
+
+  const filteredOrders = useMemo(() => {
+    if (!sanitizedSearch) return orders;
+
+    return orders.filter((o) =>
+      o.id.toLowerCase().includes(sanitizedSearch)
+    );
+  }, [orders, sanitizedSearch]);
 
   return (
     <div className="flex-1 overflow-hidden">
@@ -101,12 +182,13 @@ const ShipperOrders = () => {
               <div className="relative w-full md:w-64">
                 <input
                   type="text"
-                  placeholder="Tìm kiếm đơn hàng..."
+                  maxLength={MAX_SEARCH_LENGTH}
+                  placeholder="Tìm theo mã đơn hàng..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-4 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
-                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               </div>
             </div>
 

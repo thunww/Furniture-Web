@@ -4,6 +4,15 @@ import { toast } from 'react-toastify';
 import { getShipperProfile, updateShipperProfile, updateAvatar } from '../../redux/shipperSlice';
 import { FaTruck, FaPhone, FaIdCard, FaUser, FaEnvelope, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
+/* =======================
+   SECURITY CONSTANTS
+======================= */
+const VEHICLE_TYPES = ['bike', 'car', 'truck', 'van'];
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const PHONE_REGEX = /^(0[3|5|7|8|9])[0-9]{8}$/;
+const MAX_LICENSE_PLATE_LENGTH = 20;
+
 const ShipperProfile = () => {
   const dispatch = useDispatch();
   const { shipper, loading, error } = useSelector((state) => state.shipper);
@@ -21,24 +30,13 @@ const ShipperProfile = () => {
   useEffect(() => {
     dispatch(getShipperProfile())
       .unwrap()
-      .then(response => {
-        console.log('Profile response:', response);
-        if (response.data) {
-          setFormData({
-            vehicle_type: response.data.vehicle_type || '',
-            license_plate: response.data.license_plate || '',
-            phone: response.data.phone || ''
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching shipper profile:', error);
+      .catch(() => {
+        toast.error('Không thể tải thông tin shipper');
       });
   }, [dispatch]);
 
   useEffect(() => {
     if (shipper) {
-      console.log('Shipper data from Redux:', shipper);
       setFormData({
         vehicle_type: shipper.vehicle_type || '',
         license_plate: shipper.license_plate || '',
@@ -53,37 +51,85 @@ const ShipperProfile = () => {
 
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      toast.error('Có lỗi xảy ra');
     }
   }, [error]);
 
+  // Cleanup blob URLs to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value.trimStart(), // Prevent leading whitespace
+    }));
   };
 
   const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setAvatar(file);
-      setPreviewUrl(URL.createObjectURL(file));
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      toast.error('Chỉ cho phép ảnh JPG, PNG, WEBP');
+      return;
     }
+
+    // Validate file size
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error('Ảnh không được vượt quá 2MB');
+      return;
+    }
+
+    // Cleanup old preview URL to prevent memory leaks
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    setAvatar(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const validateProfile = () => {
+    // Validate vehicle type
+    if (!VEHICLE_TYPES.includes(formData.vehicle_type)) {
+      return 'Loại phương tiện không hợp lệ';
+    }
+
+    // Validate license plate
+    const trimmedPlate = formData.license_plate.trim();
+    if (!trimmedPlate) {
+      return 'Biển số xe không được để trống';
+    }
+    if (trimmedPlate.length > MAX_LICENSE_PLATE_LENGTH) {
+      return `Biển số xe không được quá ${MAX_LICENSE_PLATE_LENGTH} ký tự`;
+    }
+
+    // Note: Phone is not updated in profile update (backend only accepts vehicle_type and license_plate)
+    return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      if (!formData.vehicle_type || !formData.license_plate || !formData.phone) {
-        toast.error('Vui lòng điền đầy đủ thông tin');
-        return;
-      }
+    
+    const validationError = validateProfile();
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
 
+    try {
+      // Backend only accepts vehicle_type and license_plate, not phone
       const result = await dispatch(updateShipperProfile({
         vehicle_type: formData.vehicle_type,
-        license_plate: formData.license_plate,
-        phone: formData.phone
+        license_plate: formData.license_plate.trim()
       })).unwrap();
 
       if (result.success) {
@@ -91,11 +137,10 @@ const ShipperProfile = () => {
         dispatch(getShipperProfile());
         setIsEditing(false);
       } else {
-        toast.error(result.message || 'Cập nhật thông tin thất bại');
+        toast.error('Cập nhật thông tin thất bại');
       }
-    } catch (err) {
-      console.error('Error updating profile:', err);
-      toast.error(err.message || 'Cập nhật thông tin thất bại');
+    } catch {
+      toast.error('Không thể cập nhật thông tin');
     }
   };
 
@@ -106,22 +151,21 @@ const ShipperProfile = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('avatar', avatar);
+    const formDataToSend = new FormData();
+    formDataToSend.append('avatar', avatar);
 
     try {
-      const result = await dispatch(updateAvatar(formData)).unwrap();
+      const result = await dispatch(updateAvatar(formDataToSend)).unwrap();
       
       if (result.success) {
         setAvatar(null);
         toast.success('Cập nhật ảnh đại diện thành công');
         dispatch(getShipperProfile());
       } else {
-        toast.error(result.message || 'Cập nhật ảnh đại diện thất bại');
+        toast.error('Cập nhật ảnh đại diện thất bại');
       }
-    } catch (err) {
-      console.error('Error updating avatar:', err);
-      toast.error(err.message || 'Cập nhật ảnh đại diện thất bại');
+    } catch {
+      toast.error('Không thể cập nhật ảnh đại diện');
     }
   };
 
@@ -162,7 +206,7 @@ const ShipperProfile = () => {
           <div className="mt-2">
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               onChange={handleAvatarChange}
               className="block w-full text-sm text-gray-500
                 file:mr-4 file:py-2 file:px-4
@@ -198,9 +242,10 @@ const ShipperProfile = () => {
               required
             >
               <option value="">Chọn loại phương tiện</option>
-              <option value="motorcycle">Xe máy</option>
-              <option value="bike">Xe đạp</option>
+              <option value="bike">Xe máy</option>
               <option value="car">Ô tô</option>
+              <option value="truck">Xe tải</option>
+              <option value="van">Xe tải nhỏ</option>
             </select>
           </div>
 
@@ -226,10 +271,13 @@ const ShipperProfile = () => {
               type="tel"
               name="phone"
               value={formData.phone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-              required
+              readOnly
+              disabled
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed text-gray-600"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Số điện thoại không thể thay đổi sau khi đăng ký
+            </p>
           </div>
 
           <div className="flex space-x-4">

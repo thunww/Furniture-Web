@@ -152,7 +152,7 @@ export const updateShipperProfile = createAsyncThunk(
         {
           vehicle_type: profileData.vehicle_type,
           license_plate: profileData.license_plate,
-          phone: profileData.phone,
+          // Note: phone is not updatable (backend only accepts vehicle_type and license_plate)
         },
         {
           headers: {
