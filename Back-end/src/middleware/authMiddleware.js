@@ -24,6 +24,11 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid token", needLogin: true });
     }
 
+    // Block refresh tokens from accessing protected routes
+    if (decoded?.type === "refresh") {
+      return res.status(401).json({ message: "Invalid token", needLogin: true });
+    }
+
     // Lấy user từ DB để kiểm tra trạng thái
     const user = await User.findOne({
       where: { user_id: decoded.user_id || decoded.id },

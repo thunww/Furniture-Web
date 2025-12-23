@@ -59,6 +59,14 @@ User.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    reset_password_token: {
+      type: DataTypes.STRING(128),
+      allowNull: true,
+    },
+    reset_password_expires: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
     refresh_token: {
       type: DataTypes.TEXT,
       allowNull: true,

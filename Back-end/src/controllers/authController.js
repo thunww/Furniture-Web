@@ -265,12 +265,29 @@ const handleResetPassword = async (req, res) => {
       });
     }
 
+    if (error.message.includes("Token da het han")) {
+      return res.status(400).json({
+        message: "Link dat lai mat khau da het han. Vui long yeu cau lai.",
+        expired: true,
+      });
+    }
+
     if (
       error.message.includes("Token không hợp lệ") ||
       error.message.includes("Thiếu token")
     ) {
       return res.status(400).json({
         message: error.message,
+      });
+    }
+
+    if (
+      error.message.includes("Token khong hop le") ||
+      error.message.includes("Thieu token")
+    ) {
+      return res.status(400).json({
+        message: error.message,
+        invalid: true,
       });
     }
 

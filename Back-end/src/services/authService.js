@@ -15,13 +15,14 @@ const {
 } = require("../utils/passwordValidator");
 const { OAuth2Client } = require("google-auth-library");
 const { Op } = require("sequelize");
-const { hash } = require("crypto");
+const crypto = require("crypto");
 
 // ========================== CONFIG ==========================
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCK_TIME = 15 * 60 * 1000; // 15 phút
 const ATTEMPT_WINDOW = 5 * 60 * 1000; // reset nếu cách >5 phút
 const CAPTCHA_THRESHOLD = 3;
+const RESET_PASSWORD_TTL_MS = 60 * 60 * 1000;
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -400,7 +401,16 @@ const forgotPassword = async (email) => {
   }
 
   // ✅ FIX: Dùng user_id thay vì userId
-  const resetToken = generateToken({ user_id: user.user_id }, "1h");
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const resetTokenHash = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  await user.update({
+    reset_password_token: resetTokenHash,
+    reset_password_expires: new Date(Date.now() + RESET_PASSWORD_TTL_MS),
+  });
 
   try {
     await sendResetPasswordEmail(email, resetToken);
@@ -433,32 +443,32 @@ const resetPassword = async (token, newPassword) => {
     throw new Error(passwordValidation.message);
   }
 
-  // ✅ Verify token
-  let decoded;
-  try {
-    decoded = verifyToken(token);
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new Error(
-        "Token đã hết hạn. Vui lòng yêu cầu đặt lại mật khẩu mới."
-      );
-    }
-    throw new Error("Token không hợp lệ.");
-  }
+  // Verify token (one-time)
+  const tokenHash = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
 
-  const userId = decoded.user_id;
-
-  if (!userId) {
-    throw new Error("Token không hợp lệ.");
-  }
-
-  // ✅ Find user
-  const user = await User.findOne({ where: { user_id: userId } });
+  const user = await User.findOne({
+    where: { reset_password_token: tokenHash },
+  });
 
   if (!user) {
-    throw new Error("Không tìm thấy tài khoản.");
+    throw new Error("Token khong hop le.");
   }
 
+  if (
+    user.reset_password_expires &&
+    user.reset_password_expires < new Date()
+  ) {
+    await user.update({
+      reset_password_token: null,
+      reset_password_expires: null,
+    });
+    throw new Error(
+      "Token da het han. Vui long yeu cau dat lai mat khau moi."
+    );
+  }
   // ✅ Check if account is banned
   if (user.status === "banned") {
     throw new Error("Tài khoản bị khóa. Vui lòng liên hệ hỗ trợ.");
@@ -482,6 +492,8 @@ const resetPassword = async (token, newPassword) => {
   const hashedPassword = await hashPassword(newPassword);
   await user.update({
     password: hashedPassword,
+    reset_password_token: null,
+    reset_password_expires: null,
     // Optional: Reset login attempts khi đổi password
     login_attempts: 0,
     locked_until: null,
