@@ -1,502 +1,446 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
 import moment from "moment";
+import { toast } from "react-toastify";
 import "moment/locale/vi";
 
 moment.locale("vi");
 
-const LoadingSpinner = () => (
-  <div style={{ textAlign: "center", padding: "50px" }}>
-    <div style={{ fontSize: "24px", color: "#1890ff" }}>Đang tải...</div>
-  </div>
-);
+/* =======================
+   CONSTANTS
+======================= */
+
+const STATUS_TEXT = {
+  pending: "Chờ xử lý",
+  processing: "Đang xử lý",
+  shipped: "Đang giao hàng",
+  delivered: "Đã giao hàng",
+  cancelled: "Đã hủy",
+  in_transit: "Đang vận chuyển",
+};
+
+const STATUS_COLOR = {
+  pending: "#faad14",
+  processing: "#1890ff",
+  shipped: "#1890ff",
+  in_transit: "#1890ff",
+  delivered: "#52c41a",
+  cancelled: "#f5222d",
+};
+
+/* =======================
+   HELPERS
+======================= */
+
+const safeDate = (d) =>
+  d ? moment(d).format("DD/MM/YYYY HH:mm") : "Không xác định";
+
+const safeCurrency = (value) => {
+  const num = Number(value || 0);
+  if (isNaN(num)) return "0 ₫";
+  return num.toLocaleString("vi-VN") + "đ";
+};
+
+const formatAddress = (addr) => {
+  if (!addr || typeof addr !== "object") return "Không xác định";
+  return [
+    addr.address_line,
+    addr.city,
+    addr.province,
+    addr.postal_code,
+  ]
+    .filter(Boolean)
+    .join(", ");
+};
+
+/* =======================
+   COMPONENT
+======================= */
 
 const ShipperOrderDetail = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
-  const [accepting, setAccepting] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
-  const fetchOrderDetails = async () => {
-    try {
-      const response = await axiosClient.get(`/shippers/sub_orders/${orderId}`);
-      if (response.data.success) {
-        console.log("Order details:", response.data.data);
-        setOrder(response.data.data);
-      } else {
-        console.error("Error:", response.data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching order details:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAcceptOrder = async () => {
-    try {
-      setAccepting(true);
-      const response = await axiosClient.post(
-        `/shippers/sub_orders/${orderId}/accept`
-      );
-      if (response.data.success) {
-        console.log("Nhận đơn hàng thành công");
-        fetchOrderDetails();
-      } else {
-        console.error("Error:", response.data.message);
-      }
-    } catch (error) {
-      console.error("Error accepting order:", error);
-    } finally {
-      setAccepting(false);
-    }
-  };
-
-  const handleCompleteOrder = async () => {
-    try {
-      setAccepting(true);
-      const response = await axiosClient.post(
-        `/shippers/sub_orders/${orderId}/complete`
-      );
-      if (response.data.success) {
-        console.log("Hoàn thành đơn hàng thành công");
-        fetchOrderDetails();
-      } else {
-        console.error("Error:", response.data.message);
-      }
-    } catch (error) {
-      console.error("Error completing order:", error);
-    } finally {
-      setAccepting(false);
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "pending":
-        return "#faad14";
-      case "processing":
-        return "#1890ff";
-      case "shipped":
-        return "#1890ff";
-      case "delivered":
-        return "#52c41a";
-      case "cancelled":
-        return "#f5222d";
-      default:
-        return "#d9d9d9";
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case "pending":
-        return "Chờ xử lý";
-      case "processing":
-        return "Đang xử lý";
-      case "shipped":
-        return "Đang giao hàng";
-      case "delivered":
-        return "Đã giao hàng";
-      case "cancelled":
-        return "Đã hủy";
-      default:
-        return status;
-    }
-  };
-
-  const validateOrderData = (order) => {
-    if (!order) return false;
-
-    // Kiểm tra tính hợp lệ của thời gian
-    const createdAt = new Date(order.createdAt);
-    const updatedAt = new Date(order.updatedAt);
-    const estimatedDelivery = order.shipment?.estimated_delivery_date
-      ? new Date(order.shipment.estimated_delivery_date)
-      : null;
-
-    if (isNaN(createdAt.getTime()) || isNaN(updatedAt.getTime())) return false;
-    if (estimatedDelivery && isNaN(estimatedDelivery.getTime())) return false;
-    if (estimatedDelivery && estimatedDelivery < createdAt) return false;
-
-    // Kiểm tra tính hợp lệ của giá tiền
-    if (
-      isNaN(parseFloat(order.total_price)) ||
-      isNaN(parseFloat(order.shipping_fee))
-    )
-      return false;
-
-    return true;
-  };
-
+  /* ===== Fetch order ===== */
   useEffect(() => {
-    fetchOrderDetails();
-  }, [orderId]);
+    // Validate orderId format
+    if (!orderId || !/^\d+$/.test(orderId)) {
+      toast.error("Mã đơn hàng không hợp lệ");
+      navigate(-1);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchOrder = async () => {
+      try {
+        setLoading(true);
+        const res = await axiosClient.get(
+          `/shippers/sub_orders/${orderId}`,
+          { signal: controller.signal }
+        );
+
+        if (!res.data?.success) {
+          throw new Error("NOT_FOUND");
+        }
+
+        // Validate response structure
+        if (!res.data.data) {
+          throw new Error("INVALID_DATA");
+        }
+
+        setOrder(res.data.data);
+      } catch (err) {
+        if (err.name === "CanceledError" || err.name === "AbortError") return;
+
+        if (err.response?.status === 401) {
+          toast.error("Phiên đăng nhập đã hết hạn");
+          navigate("/login");
+        } else if (err.response?.status === 404) {
+          toast.error("Không tìm thấy đơn hàng");
+          navigate(-1);
+        } else {
+          toast.error(
+            err.response?.data?.message || "Không thể tải chi tiết đơn hàng"
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+
+    return () => controller.abort();
+  }, [orderId, navigate]);
+
+  /* ===== Derived data ===== */
+  const items = useMemo(() => order?.orderItems || [], [order]);
+
+  const totalItemsValue = useMemo(() => {
+    return items.reduce((sum, i) => {
+      const price = Number(i.price || 0);
+      const quantity = Number(i.quantity || 0);
+      return sum + price * quantity;
+    }, 0);
+  }, [items]);
+
+  const calcItemTotal = (item) => {
+    const itemPrice = Number(item.price || 0);
+    const itemQuantity = Number(item.quantity || 0);
+    const itemTotal = itemPrice * itemQuantity;
+    const shippingFee = Number(order?.shipping_fee || 0);
+
+    if (!totalItemsValue || !shippingFee || totalItemsValue === 0) {
+      return itemTotal;
+    }
+
+    return itemTotal + (shippingFee * itemTotal) / totalItemsValue;
+  };
+
+  // Get final status - prioritize shipment status
+  const finalStatus = useMemo(() => {
+    if (!order) return null;
+    
+    // If order is cancelled, return cancelled
+    if (order.status === "cancelled" || order.Order?.status === "cancelled") {
+      return "cancelled";
+    }
+    
+    // Prioritize shipment status if available
+    if (order.shipment?.status) {
+      return order.shipment.status;
+    }
+    
+    return order.status;
+  }, [order]);
+
+  /* ===== Actions ===== */
+  const confirmAction = async (msg, fn) => {
+    if (!window.confirm(msg)) return;
+
+    try {
+      setProcessing(true);
+      const res = await fn();
+      
+      if (res?.data?.success) {
+        toast.success("Thao tác thành công");
+        // Refresh order data
+        const refreshRes = await axiosClient.get(
+          `/shippers/sub_orders/${orderId}`
+        );
+        if (refreshRes.data?.success) {
+          setOrder(refreshRes.data.data);
+        }
+      } else {
+        throw new Error(res?.data?.message || "Thao tác thất bại");
+      }
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.message || err.message || "Thao tác thất bại";
+      toast.error(errorMsg);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const acceptOrder = () =>
+    confirmAction("Bạn có chắc muốn nhận đơn này?", () =>
+      axiosClient.post(`/shippers/sub_orders/${orderId}/accept`)
+    );
+
+  const completeOrder = () =>
+    confirmAction("Xác nhận đã giao hàng?", () =>
+      axiosClient.post(`/shippers/sub_orders/${orderId}/complete`)
+    );
+
+  /* =======================
+     RENDER
+  ======================= */
 
   if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (!order) {
     return (
-      <div
-        className="card"
-        style={{
-          padding: "20px",
-          margin: "20px",
-          border: "1px solid #d9d9d9",
-          borderRadius: "4px",
-        }}
-      >
-        <p>Không tìm thấy thông tin đơn hàng</p>
+      <div style={{ padding: 40, textAlign: "center" }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+        <p style={{ marginTop: 16 }}>Đang tải...</p>
       </div>
     );
   }
 
-  const getFinalStatus = () => {
-    if (order.status === "cancelled" || order.Order?.status === "cancelled") {
-      return "cancelled";
-    }
-    if (order.shipment?.status === "in_transit") {
-      return "in_transit";
-    }
-    return order.status;
-  };
-
-  const getFinalTotalPrice = () => {
+  if (!order) {
     return (
-      parseFloat(order.total_price) || parseFloat(order.Order?.total_price) || 0
+      <div style={{ padding: 24 }}>
+        <button onClick={() => navigate(-1)}>← Quay lại</button>
+        <div style={{ marginTop: 24, padding: 20, textAlign: "center" }}>
+          <p>Không tìm thấy thông tin đơn hàng</p>
+        </div>
+      </div>
     );
-  };
+  }
+
+  const user = order.Order?.User || {};
+  const address = order.Order?.shipping_address || {};
 
   return (
-    <div style={{ padding: "24px" }}>
+    <div style={{ padding: 24 }}>
       <button
         onClick={() => navigate(-1)}
         style={{
-          marginBottom: "16px",
+          marginBottom: 16,
           padding: "8px 16px",
           border: "1px solid #d9d9d9",
-          borderRadius: "4px",
+          borderRadius: 4,
           background: "#fff",
           cursor: "pointer",
         }}
       >
-        Quay lại
+        ← Quay lại
       </button>
 
       <div
-        className="card"
         style={{
-          padding: "20px",
-          marginBottom: "20px",
-          border: "1px solid #d9d9d9",
-          borderRadius: "4px",
+          background: "#fff",
+          padding: 24,
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          marginBottom: 24,
         }}
       >
-        <h2 style={{ marginBottom: "20px" }}>Chi tiết đơn hàng</h2>
+        <h2 style={{ marginBottom: 20 }}>Chi tiết đơn hàng #{order.sub_order_id}</h2>
 
-        <div style={{ marginBottom: "20px" }}>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>
-              Mã đơn hàng:
-            </div>
-            <div>{order.sub_order_id}</div>
-          </div>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>
-              Trạng thái:
-            </div>
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", marginBottom: 10 }}>
+            <div style={{ width: 150, fontWeight: "bold" }}>Trạng thái:</div>
             <div>
               <span
                 style={{
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  backgroundColor: getStatusColor(order.status),
+                  background: STATUS_COLOR[finalStatus] || "#d9d9d9",
                   color: "#fff",
+                  padding: "4px 8px",
+                  borderRadius: 4,
                 }}
               >
-                {getStatusText(order.status)}
+                {STATUS_TEXT[finalStatus] || finalStatus || "Không xác định"}
               </span>
             </div>
           </div>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>Ngày tạo:</div>
-            <div>{moment(order.createdAt).format("DD/MM/YYYY HH:mm")}</div>
+
+          <div style={{ display: "flex", marginBottom: 10 }}>
+            <div style={{ width: 150, fontWeight: "bold" }}>Ngày tạo:</div>
+            <div>{safeDate(order.createdAt)}</div>
           </div>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>
-              Ngày giao dự kiến:
+
+          {order.shipment?.estimated_delivery_date && (
+            <div style={{ display: "flex", marginBottom: 10 }}>
+              <div style={{ width: 150, fontWeight: "bold" }}>
+                Ngày giao dự kiến:
+              </div>
+              <div>{safeDate(order.shipment.estimated_delivery_date)}</div>
             </div>
-            <div>
-              {order.shipment?.estimated_delivery_date
-                ? moment(order.shipment.estimated_delivery_date).format(
-                    "DD/MM/YYYY HH:mm"
-                  )
-                : "Chưa cập nhật"}
+          )}
+
+          {order.shipment?.tracking_number && (
+            <div style={{ display: "flex", marginBottom: 10 }}>
+              <div style={{ width: 150, fontWeight: "bold" }}>Mã vận đơn:</div>
+              <div>{order.shipment.tracking_number}</div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div style={{ marginBottom: "20px" }}>
-          <h3>Thông tin người nhận</h3>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>Họ tên:</div>
-            <div>
-              {order.Order?.User?.first_name} {order.Order?.User?.last_name}
-            </div>
+        {/* Customer Info */}
+        {(user.first_name || user.email || user.phone) && (
+          <div style={{ marginBottom: 20, paddingTop: 20, borderTop: "1px solid #e8e8e8" }}>
+            <h3 style={{ marginBottom: 12 }}>Thông tin người nhận</h3>
+            {user.first_name && (
+              <div style={{ display: "flex", marginBottom: 8 }}>
+                <div style={{ width: 150, fontWeight: "bold" }}>Họ tên:</div>
+                <div>
+                  {user.first_name} {user.last_name || ""}
+                </div>
+              </div>
+            )}
+            {user.phone && (
+              <div style={{ display: "flex", marginBottom: 8 }}>
+                <div style={{ width: 150, fontWeight: "bold" }}>Số điện thoại:</div>
+                <div>{user.phone}</div>
+              </div>
+            )}
+            {user.email && (
+              <div style={{ display: "flex", marginBottom: 8 }}>
+                <div style={{ width: 150, fontWeight: "bold" }}>Email:</div>
+                <div>{user.email}</div>
+              </div>
+            )}
+            {address.address_line && (
+              <div style={{ display: "flex", marginBottom: 8 }}>
+                <div style={{ width: 150, fontWeight: "bold" }}>Địa chỉ:</div>
+                <div>{formatAddress(address)}</div>
+              </div>
+            )}
           </div>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>
-              Số điện thoại:
-            </div>
-            <div>{order.Order?.User?.phone}</div>
-          </div>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>Email:</div>
-            <div>{order.Order?.User?.email}</div>
-          </div>
-          <div style={{ display: "flex", marginBottom: "10px" }}>
-            <div style={{ width: "150px", fontWeight: "bold" }}>Địa chỉ:</div>
-            <div>
-              {order.Order?.shipping_address?.address_line},{" "}
-              {order.Order?.shipping_address?.city},{" "}
-              {order.Order?.shipping_address?.province}
-            </div>
-          </div>
-        </div>
+        )}
 
-        <div style={{ marginBottom: "20px" }}>
-          <h3>Danh sách sản phẩm</h3>
-          {order.orderItems && order.orderItems.length > 0 ? (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  <th
-                    style={{
-                      padding: "8px",
-                      border: "1px solid #d9d9d9",
-                      textAlign: "left",
-                    }}
-                  >
-                    Sản phẩm
-                  </th>
-                  <th
-                    style={{
-                      padding: "8px",
-                      border: "1px solid #d9d9d9",
-                      textAlign: "left",
-                    }}
-                  >
-                    Số lượng
-                  </th>
-                  <th
-                    style={{
-                      padding: "8px",
-                      border: "1px solid #d9d9d9",
-                      textAlign: "right",
-                    }}
-                  >
-                    Giá
-                  </th>
-                  <th
-                    style={{
-                      padding: "8px",
-                      border: "1px solid #d9d9d9",
-                      textAlign: "right",
-                    }}
-                  >
-                    Tổng
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {order.orderItems.map((item, index) => (
-                  <tr key={index}>
-                    <td style={{ padding: "8px", border: "1px solid #d9d9d9" }}>
-                      <div style={{ display: "flex", alignItems: "center" }}>
-                        <div
-                          style={{
-                            width: "60px",
-                            height: "60px",
-                            marginRight: "10px",
-                            overflow: "hidden",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          <img
-                            src={
-                              item.productVariant?.image_url ||
-                              "/default-product.png"
-                            }
-                            alt={item.product?.product_name}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = "/default-product.png";
-                            }}
-                          />
-                        </div>
+        {/* Products */}
+        <div style={{ marginBottom: 20, paddingTop: 20, borderTop: "1px solid #e8e8e8" }}>
+          <h3 style={{ marginBottom: 12 }}>Sản phẩm</h3>
+          {items.length > 0 ? (
+            <div style={{ overflowX: "auto" }}>
+              <table
+                width="100%"
+                style={{
+                  borderCollapse: "collapse",
+                  border: "1px solid #d9d9d9",
+                }}
+              >
+                <thead>
+                  <tr style={{ background: "#fafafa" }}>
+                    <th style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "left" }}>
+                      Sản phẩm
+                    </th>
+                    <th style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "center" }}>
+                      SL
+                    </th>
+                    <th style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "right" }}>
+                      Giá
+                    </th>
+                    <th style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "right" }}>
+                      Tổng
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item, idx) => (
+                    <tr key={item.order_item_id || idx}>
+                      <td style={{ padding: 12, border: "1px solid #d9d9d9" }}>
                         <div>
-                          <div style={{ fontWeight: "bold" }}>
-                            {item.product?.product_name}
+                          <div style={{ fontWeight: "bold", marginBottom: 4 }}>
+                            {item.product?.product_name || "Không xác định"}
                           </div>
                           {item.productVariant && (
-                            <div style={{ color: "#666", fontSize: "0.9em" }}>
-                              {item.productVariant.color && (
-                                <span>Màu: {item.productVariant.color} </span>
-                              )}
-                              {item.productVariant.size && (
-                                <span>Size: {item.productVariant.size} </span>
-                              )}
-                              {item.productVariant.material && (
-                                <span>
-                                  Chất liệu: {item.productVariant.material}{" "}
-                                </span>
-                              )}
-                              {item.productVariant.storage && (
-                                <span>
-                                  Bộ nhớ: {item.productVariant.storage}{" "}
-                                </span>
-                              )}
-                              {item.productVariant.ram && (
-                                <span>RAM: {item.productVariant.ram} </span>
-                              )}
-                              {item.productVariant.processor && (
-                                <span>
-                                  CPU: {item.productVariant.processor}{" "}
-                                </span>
-                              )}
+                            <div style={{ fontSize: "0.9em", color: "#666" }}>
+                              {[
+                                item.productVariant.color && `Màu: ${item.productVariant.color}`,
+                                item.productVariant.size && `Size: ${item.productVariant.size}`,
+                                item.productVariant.material && `Chất liệu: ${item.productVariant.material}`,
+                              ]
+                                .filter(Boolean)
+                                .join(" | ")}
                             </div>
                           )}
                         </div>
-                      </div>
+                      </td>
+                      <td style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "center" }}>
+                        {item.quantity}
+                      </td>
+                      <td style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "right" }}>
+                        {safeCurrency(item.price)}
+                      </td>
+                      <td style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "right" }}>
+                        {safeCurrency(calcItemTotal(item))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{ background: "#fafafa", fontWeight: "bold" }}>
+                    <td colSpan={3} style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "right" }}>
+                      Tổng cộng:
                     </td>
-                    <td style={{ padding: "8px", border: "1px solid #d9d9d9" }}>
-                      {item.quantity}
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px",
-                        border: "1px solid #d9d9d9",
-                        textAlign: "right",
-                      }}
-                    >
-                      {item.price.toLocaleString("vi-VN")}đ
-                    </td>
-                    <td
-                      style={{
-                        padding: "8px",
-                        border: "1px solid #d9d9d9",
-                        textAlign: "right",
-                      }}
-                    >
-                      {(() => {
-                        const itemTotal = item.price * item.quantity;
-                        const totalOrderValue = order.orderItems.reduce(
-                          (sum, orderItem) =>
-                            sum + orderItem.price * orderItem.quantity,
-                          0
-                        );
-                        const shippingFeePerItem =
-                          totalOrderValue > 0
-                            ? (parseFloat(order.shipping_fee || 0) *
-                                itemTotal) /
-                              totalOrderValue
-                            : 0;
-                        return (itemTotal + shippingFeePerItem).toLocaleString(
-                          "vi-VN"
-                        );
-                      })()}
-                      đ
+                    <td style={{ padding: 12, border: "1px solid #d9d9d9", textAlign: "right" }}>
+                      {safeCurrency(
+                        totalItemsValue + Number(order.shipping_fee || 0)
+                      )}
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </tfoot>
+              </table>
+            </div>
           ) : (
             <p>Không có sản phẩm nào trong đơn hàng</p>
           )}
         </div>
 
-        {order.shipment && (
-          <div style={{ marginBottom: "20px" }}>
-            <h3>Thông tin vận chuyển</h3>
-            <div style={{ display: "flex", marginBottom: "10px" }}>
-              <div style={{ width: "150px", fontWeight: "bold" }}>
-                Mã vận đơn:
-              </div>
-              <div>{order.shipment.tracking_number}</div>
-            </div>
-            <div style={{ display: "flex", marginBottom: "10px" }}>
-              <div style={{ width: "150px", fontWeight: "bold" }}>
-                Trạng thái:
-              </div>
-              <div>
-                <span
-                  style={{
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    backgroundColor: getStatusColor(order.shipment.status),
-                    color: "#fff",
-                  }}
-                >
-                  {getStatusText(order.shipment.status)}
-                </span>
-              </div>
-            </div>
-            <div style={{ display: "flex", marginBottom: "10px" }}>
-              <div style={{ width: "150px", fontWeight: "bold" }}>
-                Dự kiến giao:
-              </div>
-              <div>
-                {order.shipment.estimated_delivery_date &&
-                  moment(order.shipment.estimated_delivery_date).format(
-                    "DD/MM/YYYY HH:mm"
-                  )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          {order.status === "processing" && (
+        {/* Action Buttons */}
+        <div style={{ marginTop: 24, textAlign: "center", paddingTop: 20, borderTop: "1px solid #e8e8e8" }}>
+          {finalStatus === "processing" && (
             <button
-              onClick={handleAcceptOrder}
-              disabled={accepting}
+              disabled={processing}
+              onClick={acceptOrder}
               style={{
-                padding: "8px 16px",
-                border: "1px solid #1890ff",
-                borderRadius: "4px",
-                background: "#1890ff",
+                padding: "10px 24px",
+                border: "none",
+                borderRadius: 4,
+                background: processing ? "#ccc" : "#1890ff",
                 color: "#fff",
-                cursor: "pointer",
-                marginRight: "8px",
+                cursor: processing ? "not-allowed" : "pointer",
+                fontSize: 16,
+                fontWeight: "bold",
               }}
             >
-              {accepting ? "Đang xử lý..." : "Nhận đơn hàng"}
+              {processing ? "Đang xử lý..." : "Nhận đơn"}
             </button>
           )}
-          {order.status === "shipped" && (
+
+          {finalStatus === "shipped" && (
             <button
-              onClick={handleCompleteOrder}
-              disabled={accepting}
+              disabled={processing}
+              onClick={completeOrder}
               style={{
-                padding: "8px 16px",
-                border: "1px solid #1890ff",
-                borderRadius: "4px",
-                background: "#1890ff",
+                padding: "10px 24px",
+                border: "none",
+                borderRadius: 4,
+                background: processing ? "#ccc" : "#52c41a",
                 color: "#fff",
-                cursor: "pointer",
+                cursor: processing ? "not-allowed" : "pointer",
+                fontSize: 16,
+                fontWeight: "bold",
               }}
             >
-              {accepting ? "Đang xử lý..." : "Hoàn thành đơn hàng"}
+              {processing ? "Đang xử lý..." : "Hoàn thành"}
             </button>
           )}
         </div>

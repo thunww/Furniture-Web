@@ -1,5 +1,9 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../redux/authSlice";
+import { resetShipperState } from "../../redux/shipperSlice";
+import { toast } from "react-toastify";
 import { 
   Home, 
   Package, 
@@ -48,7 +52,22 @@ const MenuItem = ({ to, icon: Icon, label, isActive, isCollapsed }) => (
 
 const ShipperSidebar = ({ isOpen, toggleSidebar, currentPath, isCollapsed, toggleCollapse }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = async () => {
+    try {
+      await dispatch(logout()).unwrap();
+      dispatch(resetShipperState());
+      toast.success("Đăng xuất thành công");
+      navigate("/");
+    } catch (error) {
+      // Even if logout fails, clear local state and redirect
+      dispatch(resetShipperState());
+      navigate("/");
+    }
+  };
 
   const menuItems = [
     { to: "/shipper/dashboard", icon: FaHome, label: "Trang chủ" },
@@ -92,11 +111,7 @@ const ShipperSidebar = ({ isOpen, toggleSidebar, currentPath, isCollapsed, toggl
       {/* Logout Button */}
       <div className="absolute bottom-0 w-full p-4 border-t">
         <button
-          onClick={() => {
-            // TODO: Implement logout
-            console.log("Logout clicked");
-            toggleSidebar();
-          }}
+          onClick={handleLogout}
           className={`relative flex items-center text-red-600 hover:bg-red-50 transition-colors duration-200 px-4 py-3 w-full group ${
             isCollapsed ? "justify-center" : "space-x-2"
           }`}

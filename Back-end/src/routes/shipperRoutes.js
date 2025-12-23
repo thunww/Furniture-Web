@@ -4,6 +4,21 @@ const shipperController = require("../controllers/shipperController");
 const authMiddleware = require("../middleware/authMiddleware");
 const roleMiddleware = require("../middleware/roleMiddleware");
 const { upload } = require("../middleware/upload");
+const { apiLimiter } = require("../middleware/rateLimiter");
+const rateLimit = require("express-rate-limit");
+
+// Rate limiter riêng cho shipper registration (stricter)
+const shipperRegisterLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 phút
+  max: 5, // Tối đa 5 lần đăng ký/15 phút từ 1 IP
+  message: {
+    success: false,
+    message: "Quá nhiều yêu cầu đăng ký shipper. Vui lòng thử lại sau 15 phút.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false, // Đếm cả request thành công để tránh spam
+});
 
 router.get(
   "/admin",
@@ -18,8 +33,13 @@ router.put(
   shipperController.updateShipperStatus
 );
 
-// Đăng ký shipper
-router.post("/register", authMiddleware, shipperController.registerShipper);
+// Đăng ký shipper - Có rate limiting để tránh spam
+router.post(
+  "/register",
+  shipperRegisterLimiter,
+  authMiddleware,
+  shipperController.registerShipper
+);
 
 // Lấy thông tin shipper
 router.get(
