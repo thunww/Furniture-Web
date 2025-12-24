@@ -51,7 +51,7 @@ export const getProductById = createAsyncThunk(
   async (productId, { rejectWithValue }) => {
     try {
       const response = await productService.getProductById(productId);
-      console.log("getProductById response:", response.data);
+      //console.log("getProductById response:", response.data);
       return response.data;
     } catch (error) {
       console.error("getProductById error:", error);

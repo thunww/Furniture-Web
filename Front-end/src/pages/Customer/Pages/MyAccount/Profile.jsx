@@ -134,6 +134,8 @@ const Profile = () => {
   const handleSave = async () => {
     // Validate toàn bộ
     for (const [field, val] of Object.entries(profileData)) {
+      if (field === "profile_picture") continue;
+
       const err = validateField(field, val);
       if (err) {
         alert(`Lỗi ${field}: ${err}`);
