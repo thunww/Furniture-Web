@@ -10,7 +10,6 @@ const MyAccount = () => {
   const dispatch = useDispatch();
 
   const user = useSelector((state) => state.admin.myProfile);
-
   const loading = useSelector((state) => state.admin.loading);
 
   // ❗ CHỈ FETCH 1 LẦN — tránh loop

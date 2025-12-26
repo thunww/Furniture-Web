@@ -155,7 +155,7 @@ const Checkout = () => {
       };
 
       const response = await orderApi.createOrder(orderData);
-      console.log("Order response:", response.data);
+      //console.log("Order response:", response.data);
       if (response.data) {
         if (formData.payment_method === "vnpay" && response.data.payment_url) {
           window.location.href = response.data.payment_url;
