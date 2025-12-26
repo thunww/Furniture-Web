@@ -34,8 +34,8 @@ export const updateUser = createAsyncThunk(
   "admin/updateUser",
   async ({ user_id, ...data }, { rejectWithValue }) => {
     try {
-      const res = await adminService.updateUser(user_id, data);
-      return res.user; // BE trả { user }
+      const res = await adminService.updateUserById(user_id, data);
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data);
     }
@@ -85,7 +85,7 @@ export const fetchMyProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await adminService.getMyProfile();
-      return res.user || null;
+      return res.user || {};
     } catch (err) {
       return rejectWithValue(err.response?.data);
     }
@@ -97,7 +97,7 @@ export const updateMyProfile = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await adminService.updateMyProfile(data);
-      return res.data; // FIX
+      return res.data || res.user || res;
     } catch (err) {
       return rejectWithValue(err.response?.data);
     }
@@ -123,7 +123,7 @@ const adminSlice = createSlice({
   initialState: {
     users: [],
     selectedUser: null,
-    myProfile: null,
+    myProfile: {},
     loading: false,
     error: null,
   },
@@ -157,7 +157,7 @@ const adminSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         if (!action.payload) return;
         state.users = state.users.map((u) =>
-          u.user_id === action.payload.user_id ? action.payload : u
+          u.user_id === action.payload.user_id ? { ...u, ...action.payload } : u
         );
       })
 
@@ -187,9 +187,26 @@ const adminSlice = createSlice({
       })
 
       .addCase(uploadAvatar.fulfilled, (state, action) => {
-        if (state.myProfile) {
-          state.myProfile.profile_picture = action.payload.data.profile_picture;
+        if (state.myProfile && action.payload?.profile_picture) {
+          state.myProfile.profile_picture = action.payload.profile_picture;
         }
+      })
+
+      .addCase(updateMyProfile.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateMyProfile.fulfilled, (state, action) => {
+        state.loading = false;
+
+        if (action.payload) {
+          state.myProfile = {
+            ...state.myProfile,
+            ...action.payload,
+          };
+        }
+      })
+      .addCase(updateMyProfile.rejected, (state) => {
+        state.loading = false;
       });
   },
 });

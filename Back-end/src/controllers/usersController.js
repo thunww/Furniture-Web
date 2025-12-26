@@ -118,11 +118,23 @@ const handleUnbanUser = async (req, res) => {
 const handleUpdateUser = async (req, res) => {
   const loggedInUserId = req.user.user_id;
 
+  // ⭐ THÊM ĐOẠN NÀY
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No data to update",
+    });
+  }
+
   try {
     const result = await updateUser(loggedInUserId, req.body);
     return res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.error("handleUpdateUser error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };
 

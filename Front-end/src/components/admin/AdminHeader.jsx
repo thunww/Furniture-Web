@@ -82,17 +82,10 @@ const Header = ({ onMenuClick }) => {
               className="absolute right-0 mt-2 bg-white text-black rounded-lg shadow-lg w-44 z-10 
             transition-all transform origin-top-right scale-95"
             >
-              <button
-                className="flex items-center p-3 hover:bg-gray-100 w-full transition"
-                onClick={() => navigate("/admin/profile")}
-              >
+              <button className="flex items-center p-3 hover:bg-gray-100 w-full transition">
                 <User className="mr-2" size={18} /> Trang cá nhân
               </button>
-
-              <button
-                className="flex items-center p-3 hover:bg-gray-100 w-full transition"
-                onClick={() => navigate("/logout")}
-              >
+              <button className="flex items-center p-3 hover:bg-gray-100 w-full transition">
                 <LogOut className="mr-2" size={18} /> Đăng xuất
               </button>
             </div>

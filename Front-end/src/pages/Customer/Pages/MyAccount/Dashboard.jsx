@@ -5,11 +5,13 @@ import { fetchMyProfile } from "../../../../redux/adminSlice";
 const Dashboard = () => {
   const dispatch = useDispatch();
 
-  const user = useSelector((state) => state.admin.me);
-  const isLoading = useSelector((state) => state.admin.isLoading);
+  const user = useSelector((state) => state.admin.myProfile);
+  const isLoading = useSelector((state) => state.admin.loading);
 
   useEffect(() => {
-    dispatch(fetchMyProfile());
+    if (!user || !user.user_id) {
+      dispatch(fetchMyProfile());
+    }
   }, [dispatch]);
 
   if (isLoading || !user) {

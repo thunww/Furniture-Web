@@ -125,6 +125,12 @@ const Sidebar = ({ isOpen }) => {
           label="Shippers"
           isOpen={isOpen}
         />
+        <SidebarItem
+          to="/admin/reviews"
+          icon={<MessageSquare size={20} />}
+          label="Reviews"
+          isOpen={isOpen}
+        />
 
         {/* Các mục khác → # */}
         <SidebarItem

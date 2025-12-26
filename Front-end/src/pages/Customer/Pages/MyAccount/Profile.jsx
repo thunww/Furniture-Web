@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateMyProfile, uploadAvatar } from "../../../../redux/adminSlice";
+import { fetchMyProfile } from "../../../../redux/adminSlice";
 
 import {
   FaUser,
@@ -104,6 +105,11 @@ const ProfileField = ({ icon, label, value, isEditing, onChange, name }) => {
 const Profile = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.admin.myProfile);
+  useEffect(() => {
+    if (!user || !user.user_id) {
+      dispatch(fetchMyProfile());
+    }
+  }, []);
 
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({});
@@ -130,31 +136,42 @@ const Profile = () => {
     }));
   };
 
-  /* Lưu hồ sơ */
   const handleSave = async () => {
-    // Validate toàn bộ
-    for (const [field, val] of Object.entries(profileData)) {
-      if (field === "profile_picture") continue;
-
-      const err = validateField(field, val);
-      if (err) {
-        alert(`Lỗi ${field}: ${err}`);
-        return;
+    try {
+      // 1️⃣ Validate
+      for (const [field, val] of Object.entries(profileData)) {
+        if (field === "profile_picture") continue;
+        const err = validateField(field, val);
+        if (err) return;
       }
+
+      // 2️⃣ Upload avatar nếu có
+      let newAvatarUrl = profileData.profile_picture;
+
+      if (selectedImage) {
+        const formData = new FormData();
+        formData.append("image", selectedImage);
+
+        const res = await dispatch(uploadAvatar(formData)).unwrap();
+        newAvatarUrl = res.profile_picture;
+      }
+
+      // 3️⃣ Update profile
+      await dispatch(
+        updateMyProfile({
+          ...profileData,
+          profile_picture: newAvatarUrl,
+        })
+      ).unwrap();
+
+      // 4️⃣ Thoát edit – reset state
+      setIsEditing(false);
+      setSelectedImage(null);
+    } catch (e) {
+      // ❌ cố tình bỏ hết thông báo
+      setIsEditing(false);
+      setSelectedImage(null);
     }
-
-    // Upload Avatar
-    if (selectedImage) {
-      const formData = new FormData();
-      formData.append("image", selectedImage);
-      await dispatch(uploadAvatar(formData));
-    }
-
-    // Update profile
-    await dispatch(updateMyProfile(profileData));
-
-    setIsEditing(false);
-    setSelectedImage(null);
   };
 
   if (!user || !profileData) {
@@ -177,8 +194,9 @@ const Profile = () => {
                   src={
                     selectedImage
                       ? URL.createObjectURL(selectedImage)
-                      : profileData.profile_picture ||
-                        "https://th.bing.com/th/id/OIP.ByNwhzY5vUBvdIEfMCqDogHaHa"
+                      : user?.profile_picture
+                      ? `${user.profile_picture}?v=${user.updated_at}`
+                      : "https://th.bing.com/th/id/OIP.ByNwhzY5vUBvdIEfMCqDogHaHa"
                   }
                   alt="Avatar"
                   className="w-full h-full object-cover"
